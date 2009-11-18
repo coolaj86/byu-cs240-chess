@@ -7,8 +7,10 @@
 #include <SelectDialog.h>
 
 
-SelectDialog::SelectDialog(const std::string & title,const std::string & message, const std::vector<std::string> & buttons):
-				Dialog(title,true),label(message)
+SelectDialog::SelectDialog(const std::string & title,
+						   const std::string & message,
+						   const std::vector<std::string> & buttons)
+	:Dialog(title,true),label(message)
 {
 	//pack label
 	Gtk::VBox * vbox = get_vbox();
@@ -28,10 +30,12 @@ SelectDialog::SelectDialog(const std::string & title,const std::string & message
 	}
 }
 
-signed int SelectDialog::SelectDialogRun(const std::string & title,const std::string & message, const std::vector<std::string> & buttons)
+signed int SelectDialog::SelectDialogRun(const std::string & title,
+										 const std::string & message,
+										 const std::vector<std::string> & buttons)
 {
 	SelectDialog dialog(title,message,buttons);
-	
+
 	int result = dialog.run();
 	if(result == Gtk::RESPONSE_NONE)
 	{
@@ -45,6 +49,6 @@ signed int SelectDialog::SelectDialogRun(const std::string & title,const std::st
 	}
 	else
 		return (signed int)result;
-	
+
 }
 

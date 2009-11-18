@@ -9,7 +9,6 @@
 #include <iostream>
 #include "SelectDialog.h"
 #include "Chess.h"
-#include "Facade.h"
 
 
 Chess::Chess(std::string gladefile):gui(0),logId(0)
@@ -32,7 +31,11 @@ Chess::Chess(std::string gladefile):gui(0),logId(0)
 	gui->signal_drag_end().connect(sigc::mem_fun(*this,&Chess::on_DragEnd));
 
 	//Set g_log to print to the message area
-	logId = g_log_set_handler(0,GLogLevelFlags(G_LOG_LEVEL_MASK| G_LOG_FLAG_FATAL| G_LOG_FLAG_RECURSION),log_handler,gui);
+	logId = g_log_set_handler(0,
+							  GLogLevelFlags(G_LOG_LEVEL_MASK|
+											 G_LOG_FLAG_FATAL|
+											 G_LOG_FLAG_RECURSION),
+							  log_handler,gui);
 
 
 
@@ -41,25 +44,14 @@ Chess::Chess(std::string gladefile):gui(0),logId(0)
 	gui->WriteMessageArea("Ready!");
 	gui->WriteMessageArea("Set!\nGo!\n");
 	/*gui->WriteMessageArea(
-	"Some of the features of the using the GUI are shown as an example. They may be viewed and then deleted from the 'Chess' constructor"); */
-	gui->SetStatusBar("Ready - Go-go power player 1");
-	gui->SetTopLabel("Black");
-	gui->SetBottomLabel("White");
+	"Some of the features of the using the GUI are shown as an example.
+	They may be viewed and then deleted from the 'Chess' constructor"); */
+	gui->SetStatusBar("StatusBar");
+	gui->SetTopLabel("Top");
+	gui->SetBottomLabel("Bottom");
 
-	Facade facade;
-	for (int row = 0; row < 2; row++) {
-		for (int col = 0; col < 8; col++) {
-			gui->PlacePiece(row,col,facade.ImageAt(row,col));
-			//gui->PlacePiece(row,col,B_ROOK);
-		}
-	}
-
-	for (int row = 7; row > 5; row--) {
-		for (int col = 7; col > -1; col--) {
-			gui->PlacePiece(row,col,facade.ImageAt(row,col));
-			//gui->PlacePiece(row,col,W_ROOK);
-		}
-	}
+	gui->PlacePiece(0,0,B_ROOK);
+	gui->PlacePiece(7,7,W_ROOK);
 	/*
 	gui->HighlightSquare(4,4,RED_SQUARE);
 	gui->HighlightSquare(4,5,GREEN_SQUARE);
@@ -102,7 +94,8 @@ void Chess::on_CellSelected(int row, int col, int button)
 	  Each square of the chess board is reffered to in the GUI code as a cell.
 	This Function is called whenever the uses clicks and releases the mous button over
 	a cell without initiating a drag. Row and Column coordinates begin in the top left corner.
-	The button paramter tells which mouse button was clicked(1 for left, 2 for middle, 3 for right).
+	The button paramter tells which mouse button was clicked
+	(1 for left, 2 for middle, 3 for right).
 	You do not need to worry about wich button was used to complete the project.
 	*/
 }
@@ -113,8 +106,8 @@ void Chess::on_DragStart(int row,int col)
 	/*
 	  When a drag is initiated, this function will be called instead of on_CellSelected().
 	The paramaters row and col are the coordinates of the cell where the drag was initiated.
-	All three buttons may initiate the drag, but for our purposes can be treated the same and so
-	that paramater is not included.
+	All three buttons may initiate the drag, but for our purposes can be treated
+	the same and so	that paramater is not included.
 	*/
 }
 bool Chess::on_DragEnd(int row,int col)
@@ -177,8 +170,11 @@ void Chess::on_QuitGame()
 	/*It is not required to implement this function*/
 
 	/*
-		Called when someone selects 'Quit' from the toolbar, 'Game' menu, presses 'Ctrl-Q', or closes the window.<br>
-	on_QuitGame() does not need to be implemented to fulfill the requirements of the project, but is available for your
+		Called when someone selects 'Quit' from the toolbar,
+		'Game' menu, presses 'Ctrl-Q', or closes the window.<br>
+
+	on_QuitGame() does not need to be implemented to fulfill the
+	requirements of the project, but is available for your
 	use.
 	*/
 }
@@ -195,43 +191,49 @@ void Chess::run(Gtk::Main & app)
 	app.run(*gui);
 }
 
-
-
-void log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data)
+std::string format_log(GLogLevelFlags log_level,std::string & message)
 {
-        ///@todo Provide more info
+	//if a level is set in the LOG_LEVEL_HIDE_MASK it will fall through to the
+	//default case and so will not be printed
+	int level = log_level & (~LOG_LEVEL_HIDE_MASK & G_LOG_LEVEL_MASK);
+	std::string output;
+	switch(level)
+	{
+		case G_LOG_LEVEL_DEBUG:
+				output = std::string("DEBUG::")+message;
+			break;
+		case G_LOG_LEVEL_ERROR:
+			output = std::string("ERROR::")+message;
+			break;
+		case G_LOG_LEVEL_CRITICAL:
+			output = std::string("CRITICAL::")+message;
+			break;
+		case G_LOG_LEVEL_WARNING:
+			output = std::string("WARNING::")+message;
+			break;
+		case G_LOG_LEVEL_MESSAGE:
+			output = std::string("MESSAGE::")+message;
+			break;
+		case G_LOG_LEVEL_INFO:
+			output = std::string("INFO::")+message;
+			break;
+		default:
+			output="";
+	}
+	return output;
+}
+
+void log_handler(const gchar *log_domain,
+				 GLogLevelFlags log_level,
+				 const gchar *message, gpointer user_data)
+{
+    ///@todo Provide more info
 	std::string output= std::string(message?message:"");
 	bool fatal=false;
 
 	if(log_level & G_LOG_FLAG_FATAL) fatal=true;
 
-	//if a level is set in the LOG_LEVEL_HIDE_MASK it will fall through to the
-	//default case and so will not be printed
-	int level = log_level & (~LOG_LEVEL_HIDE_MASK & G_LOG_LEVEL_MASK);
-
-	switch(level)
-	{
-		case G_LOG_LEVEL_DEBUG:
-				output = std::string("DEBUG::")+output;
-			break;
-		case G_LOG_LEVEL_ERROR:
-			output = std::string("ERROR::")+output;
-			break;
-		case G_LOG_LEVEL_CRITICAL:
-			output = std::string("CRITICAL::")+output;
-			break;
-		case G_LOG_LEVEL_WARNING:
-			output = std::string("WARNING::")+output;
-			break;
-		case G_LOG_LEVEL_MESSAGE:
-			output = std::string("MESSAGE::")+output;
-			break;
-		case G_LOG_LEVEL_INFO:
-			output = std::string("INFO::")+output;
-			break;
-		default:
-			output="";
-	}
+	output = format_log(log_level,output);
 
 	if(fatal)
 	{
@@ -250,7 +252,8 @@ void log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar 
 			std::cerr<<output<<std::endl;
 		}
 	}
-	else {}
+	else //do nothing
+
 	return;
 }
 /**************************************************************************/

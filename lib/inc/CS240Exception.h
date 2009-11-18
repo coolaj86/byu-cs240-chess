@@ -33,7 +33,8 @@ class InvalidArgumentException : public CS240Exception {
   InvalidArgumentException() : CS240Exception("Invalid Argument") {
     return;
   }
-  InvalidArgumentException(const string & msg) : CS240Exception(string("Invalid Argument: ") + msg) {
+  InvalidArgumentException(const string & msg):	CS240Exception(string("Invalid Argument: ") +
+															   msg) {
     return;
   }
   InvalidArgumentException(const InvalidArgumentException & e) : CS240Exception(e) {

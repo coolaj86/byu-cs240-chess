@@ -12,7 +12,8 @@
 using namespace Gdk;
 using namespace Glib;
 
-ChessGuiBoardCell::ChessGuiBoardCell(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& refGlade):Gtk::Image(cobject)
+ChessGuiBoardCell::ChessGuiBoardCell(BaseObjectType* cobject,
+				     const Glib::RefPtr<Gnome::Glade::Xml>& refGlade):Gtk::Image(cobject)
 {
 	width=DEFAULT_CELL_SIZE;
 	height =DEFAULT_CELL_SIZE;
@@ -20,7 +21,7 @@ ChessGuiBoardCell::ChessGuiBoardCell(BaseObjectType* cobject, const Glib::RefPtr
 	layers.resize(MAX_LAYER,0);
 	layer_visible.resize(MAX_LAYER,false);
 	layer_alpha.resize(MAX_LAYER,255);
-	
+
 }
 
 ChessGuiBoardCell::~ChessGuiBoardCell()
@@ -33,14 +34,14 @@ void ChessGuiBoardCell::UpdateImage()
 {
 	//g_debug("ChessGuiBoardCell::updateImage");
 
-	
+
 	//scale and copy background
 	RefPtr<Pixbuf>  drawImage;
         drawImage= (*layers[BACK_GRND_LAYER])->scale_simple(width,height,INTERP_BILINEAR);
-	
-	
-        
-        RefPtr<Gdk::Pixbuf> scaled;	
+
+
+
+        RefPtr<Gdk::Pixbuf> scaled;
 	//for each layer visible, scale and draw
 	for(signed int l=BACK_GRND_LAYER+1;l<MAX_LAYER;l++)
 	{
@@ -60,11 +61,11 @@ void ChessGuiBoardCell::UpdateImage()
 				0,0,width,height,
 				(CELL_PAD/2),(CELL_PAD/2),1,1,
 				INTERP_BILINEAR,
-				layer_alpha[l]);	
+				layer_alpha[l]);
 		}
 	}
-	
-	set(drawImage);	
+
+	set(drawImage);
 
 	return;
 }
@@ -77,7 +78,7 @@ void ChessGuiBoardCell::SetLayerVisible(CellLayer layer, bool visible)
 		 g_warning("ChessGuiBoardCell::SetLayerVisible::layer out of range");
 		 return;
 	}
-	
+
 	layer_visible[layer]=visible;
 }
 void ChessGuiBoardCell::SetLayer(const Glib::RefPtr<Gdk::Pixbuf> & pix,CellLayer layer,
@@ -89,7 +90,7 @@ void ChessGuiBoardCell::SetLayer(const Glib::RefPtr<Gdk::Pixbuf> & pix,CellLayer
 		layer_visible[layer] = visible;
 		layer_alpha[layer]=alpha;
 		return;
-		
+
 	}
 	else
 	{
@@ -114,7 +115,7 @@ void ChessGuiBoardCell::SetHiglightLayer(guint color)
 	highlight = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB,
 					true,BITS_PER_SAMPLE,
 					DEFAULT_CELL_SIZE,DEFAULT_CELL_SIZE);
-	
+
 	highlight->fill(color);
 	SetLayer(highlight,HIGHLIGHT_LAYER,true,TILE_ALPHA);
 }

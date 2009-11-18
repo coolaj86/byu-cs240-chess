@@ -28,7 +28,7 @@ EXE_NAME = bin/chess
 
 LIB_OBJ_FILES = lib/obj/ChessGui.o lib/obj/ChessGuiBoard.o lib/obj/ChessGuiBoardCell.o \
 		lib/obj/ChessGuiImages.o lib/obj/SelectDialog.o
-OBJS = obj/Chess.o obj/Facade.o obj/Board.o obj/Piece.o obj/Square.o
+OBJS = obj/main.o obj/Chess.o
 
 
 .PHONY: run clean bin lib memtest
@@ -40,7 +40,7 @@ run: $(EXE_NAME)
 
 clean: 
 	-rm -f $(EXE_NAME)
-	-rm -f $(OBJS) obj/main.o obj/test.o
+	-rm -f $(OBJS)
 	-rm -f src/*~ inc/*~
 	-rm -f $(LIBRARY) $(LIB_OBJ_FILES)
 	-rm -f lib/src/*~ lib/inc/*~
@@ -58,30 +58,20 @@ memtest: $(EXE_NAME)
 	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --suppressions=chess.supp $(EXE_NAME)
 
 	
-$(EXE_NAME): obj/main.o $(OBJS)  $(LIBRARY)
-	$(CC) $(FLAGS) $(CFLAGS) $(LIBS) -o $(EXE_NAME) obj/main.o $(OBJS) $(LIBRARY) 
+$(EXE_NAME): $(OBJS)  $(LIBRARY)
+	$(CC) $(FLAGS) $(CFLAGS) $(LIBS) -o $(EXE_NAME) $(OBJS) $(LIBRARY) 
 	
 
 obj/main.o: src/main.cpp lib/inc/ChessGuiImages.h inc/Chess.h
 	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/main.o src/main.cpp
 obj/Chess.o: src/Chess.cpp inc/Chess.h lib/inc/SelectDialog.h lib/inc/ChessGuiDefines.h lib/inc/ChessGui.h
 	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Chess.o src/Chess.cpp
-obj/Board.o: src/Board.cpp inc/Board.h inc/Piece.h  inc/Square.h
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Board.o src/Board.cpp
-obj/Facade.o: src/Facade.cpp inc/Facade.h inc/Board.h inc/Piece.h inc/Square.h
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Facade.o src/Facade.cpp
-obj/Piece.o: src/Piece.cpp inc/Piece.h 
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Piece.o src/Piece.cpp
-obj/Square.o: src/Square.cpp inc/Square.h 
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Square.o src/Square.cpp
 
 
-test: $(OBJS) bin/test
-	./bin/test
-bin/test: obj/test.o $(OBJS)  $(LIBRARY)
-	$(CC) $(FLAGS) $(CFLAGS) $(LIBS) -o bin/test obj/test.o $(OBJS) $(LIBRARY)
-obj/test.o: src/Test.cpp 
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/test.o src/Test.cpp
+
+
+
+
 
 #This is currently a STATIC library, you must change it to a DYNAMIC library
 #You must also add a compiler option to the variable LIB_FLAGS in order for the library to be dynamic
