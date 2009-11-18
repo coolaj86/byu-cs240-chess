@@ -111,3 +111,16 @@ library.mk: $(shell ls lib/src/*.cpp) $(shell ls lib/inc/*.h)
 
 include library.mk
 
+
+CHESSSOURCES = $(foreach file, $(shell ls src/*.cpp), $(basename $(notdir $(file))))
+obj/%.o : src/%.cpp inc/%.h
+	$(CC) $(FLAGS) $(LIB_FLAGS) $(CFLAGS) -c -o $@ $< 
+
+  #generates the dependencies of my chess
+chess.mk: $(shell ls src/*.cpp) $(shell ls inc/*.h)
+	@-rm -f chess.mk
+	@-echo "#chess.mk is a makefile generated using the compiler to determine dependencies\n" >>chess.mk
+	@for f in $(CHESSSOURCES) ; do $(CC) -MM -MT obj/$$f.o -I inc/ -I lib/inc -I images src/$$f.cpp >> chess.mk; done
+
+include chess.mk
+

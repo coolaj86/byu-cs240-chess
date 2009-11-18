@@ -7,3 +7,4 @@ obj/*
 lib/obj/*
 lib/*.a
 library.mk
+chess.mk
