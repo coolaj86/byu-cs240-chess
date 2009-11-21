@@ -7,32 +7,26 @@
 
 #include "Piece.h"
 
-	Piece::Piece(int _color) {
-		assert (WHITE == _color || BLACK == _color);
-		color = _color;
-		if (WHITE == color)
-			type = W__PAWN;
-		else
-			type = B__PAWN;
-	}
-	Piece::~Piece() {
-		return;
-	}
+  Piece::Piece(int _color) {
+    assert (WHITE == _color || BLACK == _color);
+    color = _color;
+    if (WHITE == color)
+      type = W__PAWN;
+    else
+      type = B__PAWN;
+  }
+  Piece::~Piece() {
+    return;
+  }
 
-	PieceName Piece::Name() {
-		return type;
-	}
+  PieceName Piece::Name() {
+    return type;
+  }
 
-	bool Piece::IsFoe(Piece * piece) {
-		return IsFoe(piece->color);
-	}
-	bool Piece::IsFoe(int _color) {
-		return !(color == _color);
-	}
 /*
-	static bool Piece::UnitTest() {
-		TEST(Piece * piece = new Piece(BLACK));
-		TEST(delete piece && piece = new Piece(WHITE));
-		TEST(piece->Name());
-	}
+  static bool Piece::UnitTest() {
+    TEST(Piece * piece = new Piece(BLACK));
+    TEST(delete piece && piece = new Piece(WHITE));
+    TEST(piece->Name());
+  }
 */

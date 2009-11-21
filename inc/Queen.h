@@ -1,17 +1,12 @@
-#define BLACK	1
-#define WHITE	-1
+#ifndef _QUEEN_H_
+#define _QUEEN_H_
 
-class Piece {
+#include "Piece.h"
+
+class Queen : public Piece {
 public:
-	Piece();
-	~Piece();
-	void operator =();
-	Set<Square> Moves(Board * board);	// Return squares for valid moves
-private:
-	string type;
-	int color;
-	int direction;
-	void Init();
-	void Copy();
-	void Clear();
+	Queen(int);
+	~Queen();
 };
+
+#endif

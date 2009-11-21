@@ -26,10 +26,11 @@ EXE_NAME = bin/chess
 
 
 
-LIB_OBJ_FILES = lib/obj/ChessGui.o lib/obj/ChessGuiBoard.o lib/obj/ChessGuiBoardCell.o \
-		lib/obj/ChessGuiImages.o lib/obj/SelectDialog.o
-OBJS = obj/main.o obj/Chess.o
+SOURCES = $(foreach file, $(shell ls src/*.cpp), $(basename $(notdir $(file))))
+OBJ_FILES = $(foreach file, $(SOURCES), obj/$(file).o)
 
+LIBSOURCES = $(foreach file, $(shell ls lib/src/*.cpp), $(basename $(notdir $(file))))
+LIB_OBJ_FILES = $(foreach file, $(LIBSOURCES), lib/obj/$(file).o)
 
 .PHONY: run clean bin lib memtest
 
@@ -40,7 +41,7 @@ run: $(EXE_NAME)
 
 clean: 
 	-rm -f $(EXE_NAME)
-	-rm -f $(OBJS)
+	-rm -f $(OBJ_FILES)
 	-rm -f src/*~ inc/*~
 	-rm -f $(LIBRARY) $(LIB_OBJ_FILES)
 	-rm -f lib/src/*~ lib/inc/*~
@@ -58,14 +59,14 @@ memtest: $(EXE_NAME)
 	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --suppressions=chess.supp $(EXE_NAME)
 
 	
-$(EXE_NAME): $(OBJS)  $(LIBRARY)
-	$(CC) $(FLAGS) $(CFLAGS) $(LIBS) -o $(EXE_NAME) $(OBJS) $(LIBRARY) 
+$(EXE_NAME): $(OBJ_FILES)  $(LIBRARY)
+	$(CC) $(FLAGS) $(CFLAGS) $(LIBS) -o $(EXE_NAME) $(OBJ_FILES) $(LIBRARY) 
 	
 
-obj/main.o: src/main.cpp lib/inc/ChessGuiImages.h inc/Chess.h
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/main.o src/main.cpp
-obj/Chess.o: src/Chess.cpp inc/Chess.h lib/inc/SelectDialog.h lib/inc/ChessGuiDefines.h lib/inc/ChessGui.h
-	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Chess.o src/Chess.cpp
+#obj/main.o: src/main.cpp lib/inc/ChessGuiImages.h inc/Chess.h
+#	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/main.o src/main.cpp
+#obj/Chess.o: src/Chess.cpp inc/Chess.h lib/inc/SelectDialog.h lib/inc/ChessGuiDefines.h lib/inc/ChessGui.h
+#	$(CC) -c $(FLAGS) $(CFLAGS) -o obj/Chess.o src/Chess.cpp
 
 
 
@@ -89,7 +90,6 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 ########DO NOT DELETE###########################################################################################3
 #Below is some Makefile Magic to compile the libraries, you do not need to
 #understand or alter it.  If you would like to, look up the Make manual online, it's very comprehensive	
-LIBSOURCES = $(foreach file, $(shell ls lib/src/*.cpp), $(basename $(notdir $(file))))
 
 lib/obj/%.o : lib/src/%.cpp lib/inc/Inline.h
 	$(CC) $(FLAGS) $(LIB_FLAGS) $(CFLAGS) -c -o $@ $< 

@@ -1,73 +1,72 @@
 #include "Board.h"
 
+#include <iostream>
+using namespace std;
+
 Board::Board() {
-	Init();
+  _init();
 }
 
 Board::~Board() {
 
 }
 
-void Board::Init() {
-	InitPieces(BLACK_START, BLACK_STEP, BLACK);
-	InitPieces(WHITE_START, WHITE_STEP, WHITE);
-	for (int i = BLACK_END; i < WHITE_END+1; ++i) {
-		board[i] = NULL;
-	}
-	board[32] = new Piece(BLACK);
-	board[31] = new Piece(WHITE);
+void Board::_init() {
+  board = new Piece * [NUM_SQUARES];
+  for (int i = 0; i < NUM_SQUARES; i++) { board[i] = NULL; }
+  //memset(board, 0, sizeof(Piece*) * NUM_SQUARES);
 }
 
-void Board::InitPieces(int pos, int dist, int color) {
-	assert(-1 == pos || 64 == pos);
-	/*
-	board[pos+dist] = new Rook();
-	board[pos+dist] = new Knight();
-	board[pos+dist] = new Bishop();
-	board[pos+dist] = new King();
-	board[pos+dist] = new Queen();
-	board[pos+dist] = new Bishop();
-	board[pos+dist] = new Knight();
-	board[pos+dist] = new Rook();
-	*/
-	for (int i = 0; i < 8; i++) {
-		board[pos+dist] = new Piece(color);
-	}
-	for (int i = 0; i < 8; i++) {
-		board[pos+dist] = new Piece(color);
-		//board[pos+dist] = new Pawn();
-	}
+// TODO Does this require a pointer to maintain Rook-ness?
+// I'd prefer that the creation occur here by reference
+// otherwise I violate "the class that creates also destroys"
+void Board::PlacePiece(int row, int col, Piece* piece)
+{
+  // TODO history (i.e. handle pawn promotion)
+  if (board[(row * 8) + col])
+    delete board[(row * 8) + col];
+  board[(row * 8) + col] = piece;
 }
 
-PieceName Board::PieceNameAt(const Square & square) const {
-	printf("Here I Am");
-	Piece & piece = PieceAt(square);
-	if (NULL != &piece)
-		return piece.Name();
-	else
-		return NO__PIECE;
+void Board::MoveFromTo(int row1, int col1, int row2, int col2)
+{
+  if (!board[(row1 * 8) + col1])
+    return;
+  // TODO history
+  if (board[(row2 * 8) + col2])
+    delete board[(row2 * 8) + col2];
+  board[(row2 * 8) + col2] = board[(row1 * 8) + col1];
+  board[(row1 * 8) + col1] = NULL;
 }
-Piece & Board::PieceAt(const Square & square) const {
-	assert(square.ToInt() > -1 && square.ToInt() < 64);
-	return *board[square.ToInt()];
+
+Piece& Board::PieceAt(int row, int col) const {
+  //assert(square.ToInt() > -1 && square.ToInt() < 64);
+  // TODO (row * 8) + col
+  return *(board[(row * 8) + col]);
 }
 
 /*
+  bool Square::IsValid() const {
+    return (posY > -1 && posY < 8) && (posX > -1 && posX < 8);
+  }
+
+  int Square::ToInt() const {
+    assert (IsValid());
+    return (posY * 8) + posX;
+  }
+ */
+
+/*
 void	Clear() {
-	for i < length {
-		if i < index
-			delete board[i];
-		board[i] = NULL;
-	}
-	board[i] = NULL;
-	delete [] board;
-	board = NULL;
+  for i < length {
+    if i < index
+      delete board[i];
+    board[i] = NULL;
+  }
+  board[i] = NULL;
+  delete [] board;
+  board = NULL;
 }
 
-Piece * ReplaceAt(Square * square, Piece * piece) {
-	int position = square->ToInt();
-	Piece * result = board[position];
-	board[position] = piece;
-}
 */
 

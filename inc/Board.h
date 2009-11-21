@@ -1,18 +1,23 @@
-/*
-king
-make move
-cycle through each piece to see if king is now in check
+#ifndef _BOARD_H_
+#define _BOARD_H_
+
+//#include <stdio.h> memset???
+#include "Piece.h"
+#include "Pawn.h"
+#include "Rook.h"
+#include "Knight.h"
+#include "Bishop.h"
+#include "Queen.h"
+#include "King.h"
 
 
-
-return array of possible moves
-check square for other piece
-check from square for check on king
-getLegalMoves (can't put your own king in jepoerdy)
-history.Add(Board * board);
-history.ToXML(ostream * fileName); // Add current board to history
-*/
-
+#define	NUM_SQUARES	64
+#define BLACK_START 	-1
+#define BLACK_END 	16
+#define BLACK_STEP 	1
+#define WHITE_START 	64
+#define WHITE_END 	47
+#define WHITE_STEP 	-1
 
 /******************************************
  ******************************************
@@ -25,7 +30,7 @@ history.ToXML(ostream * fileName); // Add current board to history
 
    | 2 | 8   *   *   *   *   *   *   15
 
-   | 3 | 16  *   *   *   *   *   *   23
+   | 3 | 16                          23
 
    | 4 | 24                          31
 Y
@@ -33,51 +38,39 @@ Y
 
    | 6 | 40                          47
 
-   | 7 | 48                          55
+   | 7 | 48  *   *   *   *   *   *   55
 
-   | 8 | 56                          63
+   | 8 | 56  *   *   *   *   *   *   63
 
  ******************************************
  ******************************************/
-#ifndef _BOARD_H_
-#define _BOARD_H_
 
-#include <cstdlib>
-#include <cstdio>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "Square.h"
-#include "Piece.h"
-
-#define	NUM_SQUARES	64
-#define BLACK_START 	-1
-#define BLACK_END 	16
-#define BLACK_STEP 	1
-#define WHITE_START 	64
-#define WHITE_END 	47
-#define WHITE_STEP 	-1
-
+/*!
+ * Handles Memory Management and Mapping for the Board array and all pieces
+ * Allows safe manipulation of the board in any way.
+ *
+ * No logic is stored at this level. You could totally create your own game
+ * with any pieces of type Piece and any upper layer of type Game
+ */
 class Board {
 public:
-	Board();
-	~Board();
-	/*
-	operator =();
-	Piece * PieceAt();
-	bool IsSafe(Square *, int color);
-	bool IsConquerable(Square *, int color);
-	*/
-	Piece & PieceAt(const Square & square) const;
-	PieceName PieceNameAt(const Square & square) const;
-	Piece & PieceAt(int row, int col) const;
-	void PlacePieces(int pos, int dist);
-	void UnitTest();
+  Board();																									//!< Creates a clear board
+  Board(Board&);																						//!< Copy contructor
+  Board& operator=(Board&);																	//!< Copy assignment
+  ~Board();																									//!< Clears the board
+
+  Piece& PieceAt(int row, int col) const;										//!< Retrieve the piece
+  Piece* RemovePieceAt(int row, int col);										//!< Remove and delete the piece
+  void PlacePiece(int row, int col, Piece *);								//!< Place a piece at row,col; removing existing piece if necessary
+  void MoveFromTo(int row1, int col1, int row2, int col2);	//!< Safetly (memory) moves piece from one square to another and updates history
+  void Test();																							//!< Runs Unit Tests on the Board
+
 private:
-	Piece * board[NUM_SQUARES];
-	void Init();
-	void Copy();
-	void Clear();
-	void InitPieces(int start, int end, int color);
+  Piece** board;																						//!< Flat array, which is mapped
+  void _init();																							//!< Setup a new board
+  int	_map(int row, int col);																//!< Does Bounds checking and mapping
+  void _copy();																							//!< Copy helper
+  void _clear();																						//!< Free all memory in the board
+
 };
 #endif

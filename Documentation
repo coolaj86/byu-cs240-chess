@@ -1,0 +1,553 @@
+CS240 Chess - AJ ONeal
+
+
+Chess.h
+
+private:
+    Game game;												//!< the facade
+    string filename;
+    int cur_row;											//!< row of selected piece
+    int cur_col;											//!< col of selected piece
+    void _init();															//!< create a new game and draw the board
+    void _update_board();											//!< redraw the entire board, clearing highlights and pieces
+    bool _piece_is_selected();								//!< if a piece is currently selected
+    void _select_piece(int row, int col);			//!< mark a piece as selected (distinguishes between onCellSelects)
+    void _deselect_piece();										//!< mark no piece as selected and clear highlights
+    void _unhighlight_all();									//!< remove highlights from all squares
+
+
+
+
+Chess.cpp (Top Level Algorithm)
+#include <iostream>
+
+#include "SelectDialog.h"
+#include "Chess.h"
+
+using namespace std;
+
+void Chess::_init()
+{
+  _deselect_piece();
+  gui->WriteMessageArea("Ready!\n");
+  gui->WriteMessageArea("Set!\nGo!\n");
+  gui->SetTopLabel("Black");
+  gui->SetBottomLabel("White");
+  _update_board();
+}
+
+Chess::~Chess()
+{
+  //set you clean up code here****
+
+  // That was easy...
+
+  //******************************
+  g_log_remove_handler(0,logId);//remove reference to data
+  delete gui;
+  gui=0;
+
+
+
+}
+
+
+void Chess::_update_board()
+{
+  // TODO have the board switch sides based on color
+  for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < 8; col++) {
+      gui->UnHighlightSquare(row, col);
+      gui->ClearPiece(row, col);
+      gui->PlacePiece(row, col, game.WhatPieceIsAt(row, col));
+      /*
+      if (NULL == game.WhatPieceIsAt(row, col))
+      {
+        gui->ClearPiece(row, col);
+      }
+      else
+      {
+        gui->PlacePiece(row, col, game.WhatPieceIsAt(row, col));
+      }
+      */
+    }
+  }
+
+  string banner = (WHITE == game.WhoseTurn()) ? "White" : "Black";
+  banner.append(" - it's your turn!");
+  gui->SetStatusBar(banner.c_str());
+}
+
+bool Chess::_piece_is_selected()
+{
+  return -1 != cur_row;
+}
+
+void Chess::_deselect_piece()
+{
+  cur_row = -1;
+  cur_col = -1;
+  _unhighlight_all();
+}
+
+/*
+ * Highlight the piece green if it can move, along with it's moves
+ * otherwise highlight the piece yellow
+ * store the fact that the piece is selected
+ */
+void Chess::_select_piece(int row, int col)
+{
+  if(!game.HasTurn(row, col)) { return; }
+
+  cur_row = row;
+  cur_col = col;
+  gui->HighlightSquare(row,col, YELLOW_SQUARE);
+
+  vector<Cell> cells = game.WhereCanPieceMoveFrom(row, col);
+  if (cells.size() > 0)
+  {
+    gui->HighlightSquare(row,col, GREEN_SQUARE);
+    for (int i = 0; i < cells.size(); i++)
+    {
+      gui->HighlightSquare(cells[i].row, cells[i].col, GREEN_SQUARE);
+    }
+  }
+}
+
+void Chess::_unhighlight_all()
+{
+  for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < 8; col++) {
+      gui->HighlightSquare(row,col, CLEAR_SQUARE);
+    }
+  }
+}
+
+/********Implement These*****************************/
+
+/*
+ * Clear the highlights
+ *
+ * If no piece is selected
+ * 	select the piece (if it's that piece's turn) |green : none
+ * 	show the (im)possible moves |green : red
+ * If a piece is selected
+ * 	case invalid move
+ * 		deselect and attempt new select
+ * 	case enemy_square
+ * 		capture
+ * 	case friendly_square
+ *
+ * 	commit a move or deselect the piece
+ */
+void Chess::on_CellSelected(int row, int col, int button)
+{
+  cout << "Chess::on_CellSelected nsth" << endl;
+  //g_debug("Chess::on_CellSelected (%d,%d)",row,col);
+
+  if (_piece_is_selected())
+  {
+    cout << "Using prev" << endl;
+    //g_debug("Using previous selection");
+    if (game.MoveFromTo(cur_row, cur_col, row, col))
+    {
+      cout << "Moved" << endl;
+      //g_debug("Moved Piece");
+      _deselect_piece();
+      _update_board();
+    }
+    else
+    {
+      cout << "Couldn't move" << endl;
+      //g_debug("Could not complete move");
+      _deselect_piece();
+      _select_piece(row, col);
+    }
+  }
+  else
+  {
+    cout << "Selected" << endl;
+    //g_debug("Made selection");
+    _deselect_piece();
+    _select_piece(row, col);
+  }
+}
+
+void Chess::on_DragStart(int row,int col)
+{
+  g_debug("Chess::on_DragStart (%d,%d)",row,col);
+  on_CellSelected(row, col, 1);
+}
+bool Chess::on_DragEnd(int row,int col)
+{
+  g_debug("Chess::on_DragEnd (%d,%d)",row,col);
+  on_CellSelected(row, col, 1);
+
+  //by convention, this should return a boolean value indicating if the drag was accepted or not.
+  return false;
+}
+
+void Chess::on_NewGame()
+{
+  g_debug("Chess::on_NewGame");
+  game.NewGame();
+  _update_board();
+}
+
+void Chess::on_SaveGame()
+{
+  g_debug("Chess::on_SaveGame");
+  if (filename.size() == 0) { filename = gui->SelectSaveFile(); }
+  game.Save(filename);
+}
+
+void Chess::on_SaveGameAs()
+{
+  g_debug("Chess::on_SaveGameAs");
+  filename = gui->SelectSaveFile();
+  game.Save(filename);
+  /*
+  Called when someone selects 'Save As' from the 'Game' menu, or presses 'Shift-Ctrl-S'.
+  */
+}
+void Chess::on_LoadGame()
+{
+  g_debug("Chess::on_LoadGame");
+  game.Load(gui->SelectLoadFile());
+  /*
+  Called when someone selects 'Open' from the toolbar, 'Game' menu, or presses 'Ctrl-O'.
+  */
+}
+
+void Chess::on_UndoMove()
+{
+  g_debug("Chess::on_UndoMove");
+  game.Undo();
+  /*
+  Called when someone selects 'Undo' from the toolbar, 'Game' menu, or presses 'Ctrl-Z'.
+  */
+}
+
+#ifndef _GAME_H_
+#define _GAME_H_
+
+#include <stdlib.h>
+#include <assert.h>
+#include <string>
+#include <vector>
+
+#include "ChessGuiDefines.h"
+#include "Board.h"
+#include "Cell.h"
+
+using namespace std;
+
+class Game {
+public:
+  Game();
+  //Game(int Rules);																					//!< 'OR'ed representation of rules (allow En Passant, etc)
+  ~Game();
+
+  void NewGame();																							//!< Frees memory of old game and allocates a new one
+  // TODO use bitwise OR-ing to simplify these three
+  ImageName WhatPieceIsAt(int row, int col) const;						//!< Returns int value (ImageName) of Piece
+  PieceType WhatTypeIsAt(int row, int col) const;							//!< Returns int value (PieceType) of Piece
+  PieceColor WhatColorIsAt(int row, int col) const;						//!< Returns int value (PieceColor) of Piece
+
+  /*
+   * Ask the piece where it can normally move
+   * and then check the board to see if it is empty
+   * has an enemy, or a friend, and add to the vector
+   * accordingly (will probably change to set)
+   */
+  vector<Cell> WhereCanPieceMoveFrom(int row, int col);				//!< Get a set of cell coordinates which imply legal moves
+
+  bool MoveFromTo(int row1, int col1, int row2, int col2);		//!< Moves a piece, if any, and returns true if possible and updates history, changes the turn on success
+  int WhoseTurn() const;																			//!< Return whose turn it is
+  bool HasTurn(int row, int col) const;												//!< (PieceColor == TurnColor) ? true : false
+
+  void Undo();																								//!< Pops move from history and performs the reverse
+  void Save(string filename);																	//!< Writes history to xml
+  void Load(string filename);																	//!< Clears the game and loads history
+
+  void Test();																								//!< Runs Unit Tests
+
+private:
+  Board board;
+  //vector<Move> history;
+  int whose_turn;
+
+  ImageName _convert_piece_to_image_name(const PieceName piece) const;	//!< Purposefully Violates the Facade design
+
+  void _init();
+  void _clear();
+
+};
+#endif
+
+
+#ifndef _PIECE_H_
+#define _PIECE_H_
+
+#include <assert.h>
+#include "ChessDebug.h"
+#include "Cell.h"
+
+#define BLACK	1
+#define WHITE	-1
+
+
+/*
+ *  TODO Change these enums to be useful for bitwise calculations
+ */
+
+enum PieceName {
+  NO__PIECE=0,BACK__GRND=1,
+  WHITE__TILE=2,BLACK__TILE=3,
+  W__PAWN=4,B__PAWN=5,
+  W__ROOK=6,B__ROOK=7,
+  W__KNIGHT=8,B__KNIGHT=9,
+  W__BISHOP=10,B__BISHOP=11,
+  W__KING=12,B__KING=13,
+  W__QUEEN=14,B__QUEEN=15,
+  NUM__PIECE__NAMES=16
+  };
+
+enum PieceType {
+  NO_TYPE=0,
+  PAWN=1,
+  ROOK=2,
+  KNIGHT=3,
+  BISHOP=4,
+  KING=5,
+  QUEEN=6,
+  NUM_TYPE_NAMES=7
+  };
+
+enum PieceColor {
+  NO_COLOR=0,
+  _BLACK_=1,
+  _WHITE_=-1,
+  NUM_COLOR_NAMES=3
+  };
+
+class Piece {
+public:
+  Piece(int);
+  ~Piece();
+
+  PieceName Name();
+  PieceType Type();
+  PieceColor Color();
+
+  void Test();
+
+  /*
+   * I don't like how the piece assumes things
+   * about the board... but I don't know a cleaner
+   * way to do this simply.
+   *
+   * Bleh! C and it's no multiple return types!
+   * Give me a real /programming/ language next
+   * time will ya? We're hardly CEs y'know.
+   */
+  /*!
+   * The piece assumes an 8x8 board.
+   * given a row, col it will return cells
+   * to which it can move (depending on the color, the Game will handle
+   * the logic from that point on
+   */
+  virtual set<cell> Moves(int row, int col);			//!< Given a cell, returns the cells to which the piece can move from that cell
+
+protected:
+  PieceName type;
+  // PieceColor color;
+  int color;
+  int direction; // TODO nix this, the color knows which direction to go
+  void Init(); // TODO fix style to match other private methods
+  void Copy();
+  void Clear();
+};
+#endif
+
+
+
+#ifndef _BOARD_H_
+#define _BOARD_H_
+
+#include "Square.h"
+#include "Piece.h"
+#include "Pawn.h"
+#include "Rook.h"
+#include "Knight.h"
+#include "Bishop.h"
+#include "Queen.h"
+#include "King.h"
+
+
+#define	NUM_SQUARES	64
+#define BLACK_START 	-1
+#define BLACK_END 	16
+#define BLACK_STEP 	1
+#define WHITE_START 	64
+#define WHITE_END 	47
+#define WHITE_STEP 	-1
+
+/*!
+ * Handles Memory Management and Mapping for the Board array and all pieces
+ * Allows safe manipulation of the board in any way.
+ *
+ * No logic is stored at this level. You could totally create your own game
+ * with any pieces of type Piece and any upper layer of type Game
+ */
+class Board {
+public:
+  Board();																									//!< Creates a clear board
+  Board(Board&);																						//!< Copy contructor
+  Board& operator=(Board&);																	//!< Copy assignment
+  ~Board();																									//!< Clears the board
+
+  /* going to move these to game */
+  PieceName PieceNameAt(int row, int col) const;						//!< Get just the name of the piece
+  PieceColor PieceColorAt(int row, int col);								//!< Get just the color of the piece
+  PieceType PieceTypeAt(int row, int col);									//!< Get just the type of the piece
+  /* end */
+
+  // It's so annoying that I can't return a null reference...
+  Piece& PieceAt(int row, int col) const;										//!< Retrieve the piece
+  Piece* RemovePieceAt(int row, int col);										//!< Remove and delete the piece
+  void PlacePieceAt(Piece const& , int row, int col);				//!< Place a piece at row,col; removing existing piece if necessary
+  void MoveFromTo(int row1, int col1, int row2, int col2);	//!< Safetly (memory) moves piece from one square to another and updates history
+  void Test();																							//!< Runs Unit Tests on the Board
+
+private:
+  Piece** board;																						//!< Flat array, which is mapped
+  void _init();																							//!< Setup a new board
+  int	_map(int row, int col);																//!< Does Bounds checking and mapping
+  /* going to get moved to Game class */
+  //void InitPieces(int pos, int dist, int color);
+  void _copy();																							//!< Copy helper
+  void _clear();																						//!< Free all memory in the board
+
+};
+#endif
+
+
+#ifndef _CELL_H_
+#define _CELL_H_
+
+/* Because it's faster that learning to use structs. The end */
+class Cell
+{
+  public:
+    Cell();
+    Cell(int row, int col);
+    ~Cell();
+
+    int row;
+    int col;
+};
+
+#endif
+
+
+#ifndef _MOVE_H_
+#define _MOVE_H_
+
+/* History */
+class Move
+{
+  public:
+    Move();
+    ~Move();
+		
+		struct_something_or_other piece_thnig {
+	    int row1;
+	    int col1;
+			PieceType type1;
+			PieceColor color1;
+		}
+
+		piece_thnig start_piece;
+		piece_thnig opponent;
+		piece_thnig end_piece;
+		
+};
+
+#endif
+
+
+
+Pawn.h
+Rook.h
+Knight.h
+Bishop.h
+Queen.h
+King.h
+
+All of the above will handle special logic as necessary.
+
+
+Algorithms
+New Game
+	Clears the facade, which clears the game, which clears the board and history and pices, then Init()s the new game, which means putting pieces on the board in the default location
+
+Move Piece
+	if the user has a piece selected attempt to move the piece to the place dragged or clicked. If the move commits, add it to the history.
+
+Undo Move
+	facade pops a move from the history and read it backwards.
+
+Save Game
+	echo <board>
+	for row in board
+		for col in row
+			echo <piece type="{piece.type}" color="{piece.color}" row="{row}" column="{col}"/>
+	echo </board>
+	echo <history>
+	for move in history
+		echo <move>
+		for piece_thing in move
+		    echo <piece type="{piece.type}" color="{piece.color}" row="{row}" column="{col}"/>
+		echo </move>
+	echo </history>
+	to_file()
+
+Load Game
+	XML Parser or:
+	for regex_search(<board>)
+		for regex_search(<piece>)
+			type, color, row, col = match[1], match[2], match[3], match[4]
+	for regex_search(history)
+		for regex_search(<move>)
+			for regex_search(<piece_thing>)
+				type, color, row, col = match[1], match[2], match[3], match[4]
+	
+
+Detailed description of data structure used to store sets of moves
+	The board manages all of the piece memory and the board array
+	A move stores a smugdel of piece, and board information
+
+
+Detect check, checkmate, and stalemate
+	Check: 
+	Every time that a move is committed to the history, the Game will ask
+	each piece of the opposing team for its possible moves and determine
+	if the king is in check. If so, the move will be automatically undone
+	and return false;
+
+	Stalemate
+	If all possible moves will put the king in check, this is stalemate.
+
+	Checkmate:
+	Before a piece can move, the opposing pieces will be queried for moves,
+	if the Game determines that the king is in check, only moves which will
+	take the king out of check will be considered valid.
+	If no moves will take the king out of check, this is checkmate.
+
+	After each move the gui will check to see if the stalemate flag has been set
+
+
+Please forgive my text editorness....
+
+:D

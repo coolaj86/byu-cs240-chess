@@ -9,17 +9,17 @@
 #ifndef CHESS_H
 #define CHESS_H
 
-
-#include <string>
-#include <vector>
-#include <map>
 #include <glibmm/refptr.h>
 #include <libglademm.h>
 #include <sigc++/sigc++.h>
 #include <gtkmm/main.h>
 
+#include <string>
+#include <vector>
+
 #include "ChessGuiDefines.h"
 #include "ChessGui.h"
+#include "Game.h"
 
 
 ///@def LOG_LEVEL_HIDE_MASK
@@ -54,79 +54,86 @@
 ///@ingroup backend
 class Chess
 {
-	private:
+  private:
 
-		///Access to the user interface
-		ChessGui * gui;
-		///Log-id (for memory management)
-		guint logId;
-
-
-		///@name Add your variables here
-		///@{
-
-		///@}
-
-	public:
-		///@param gladefile See @link cs240chess.glade "Glade File" @endlink
-		Chess(std::string gladefile);
-		~Chess();
-
-		///allows Gtk::Main to handle showing and hiding the window on exit
-		void run(Gtk::Main & app);
-
-		///@name Student Implemented Functions
-		///@{
-
-		///Connected to (activated by) ChessGui::signal_cell_selected()
-		///@param row 1-8, top to bottom
-		///@param col 1-8, left to right
-		///@param button 1=left mouse button, 2=middle mouse button, 3=right mouse  button
-		void on_CellSelected(int row, int col, int button);
+    ///Access to the user interface
+    ChessGui * gui;
+    ///Log-id (for memory management)
+    guint logId;
 
 
-		///Connected to (activated by) ChessGui::signal_new_selected()
-		void on_NewGame();
+    ///@name Add your variables here
+    ///@{
+    Game game;												//!< the facade
+    string filename;
+    int cur_row;											//!< row of selected piece
+    int cur_col;											//!< col of selected piece
+    ///@}
 
-		///Connected to (activated by) ChessGui::signal_save_selected()
-		void on_SaveGame();
+  public:
+    ///@param gladefile See @link cs240chess.glade "Glade File" @endlink
+    Chess(std::string gladefile);
+    ~Chess();
 
-		///Connected to (activated by) ChessGui::signal_save_as_selected()
-		void on_SaveGameAs();
+    ///allows Gtk::Main to handle showing and hiding the window on exit
+    void run(Gtk::Main & app);
 
-		///Connected to (activated by) ChessGui::signal_load_selected()
-		void on_LoadGame();
+    ///@name Student Implemented Functions
+    ///@{
 
-		///Connected to (activated by) ChessGui::signal_undo_selected()
-		void on_UndoMove();
-
-		///Connected to (activated by) ChessGui::signal_quit_selected()
-		void on_QuitGame();
-
-
-		///@param row where drag began
-		///@param col where drag began
-		void on_DragStart(int row,int col);
-
-		///@param row where drag ended
-		///@param col where drag ended
-		///@return true if the drag resulted in a successful drop
-		bool on_DragEnd(int row,int col);
-		///@}
-	private:
-		///@name Add your functions here
-		///@{
+    ///Connected to (activated by) ChessGui::signal_cell_selected()
+    ///@param row 1-8, top to bottom
+    ///@param col 1-8, left to right
+    ///@param button 1=left mouse button, 2=middle mouse button, 3=right mouse  button
+    void on_CellSelected(int row, int col, int button);
 
 
-		///@}
+    ///Connected to (activated by) ChessGui::signal_new_selected()
+    void on_NewGame();
+
+    ///Connected to (activated by) ChessGui::signal_save_selected()
+    void on_SaveGame();
+
+    ///Connected to (activated by) ChessGui::signal_save_as_selected()
+    void on_SaveGameAs();
+
+    ///Connected to (activated by) ChessGui::signal_load_selected()
+    void on_LoadGame();
+
+    ///Connected to (activated by) ChessGui::signal_undo_selected()
+    void on_UndoMove();
+
+    ///Connected to (activated by) ChessGui::signal_quit_selected()
+    void on_QuitGame();
+
+
+    ///@param row where drag began
+    ///@param col where drag began
+    void on_DragStart(int row,int col);
+
+    ///@param row where drag ended
+    ///@param col where drag ended
+    ///@return true if the drag resulted in a successful drop
+    bool on_DragEnd(int row,int col);
+    ///@}
+  private:
+    ///@name Add your functions here
+    ///@{
+    void _init();															//!< create a new game and draw the board
+    void _update_board();											//!< redraw the entire board, clearing highlights and pieces
+    bool _piece_is_selected();								//!< if a piece is currently selected
+    void _select_piece(int row, int col);			//!< mark a piece as selected (distinguishes between onCellSelects)
+    void _deselect_piece();										//!< mark no piece as selected and clear highlights
+    void _unhighlight_all();									//!< remove highlights from all squares
+    ///@}
 
 };
 
 ///Log handler to be set to g_log
 ///user_data must be a valid pointer to an initiated ChessGui
 void log_handler(const gchar *log_domain,
-				 GLogLevelFlags log_level,
-				 const gchar *message, gpointer user_data);
+         GLogLevelFlags log_level,
+         const gchar *message, gpointer user_data);
 
 
 #endif
