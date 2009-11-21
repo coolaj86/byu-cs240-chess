@@ -5,7 +5,7 @@
 
 class King : public Piece{
 public:
-	King(int);
+	King(PieceColor);
 	~King();
 private:
 	bool firstMove;

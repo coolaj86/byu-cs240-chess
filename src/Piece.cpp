@@ -7,20 +7,27 @@
 
 #include "Piece.h"
 
-  Piece::Piece(int _color) {
+  Piece::Piece(PieceColor _color) :
+    type(PAWN)
+  {
     assert (WHITE == _color || BLACK == _color);
     color = _color;
-    if (WHITE == color)
-      type = W__PAWN;
-    else
-      type = B__PAWN;
   }
+
   Piece::~Piece() {
     return;
   }
 
   PieceName Piece::Name() {
+    return (PieceName) (type + color);
+  }
+
+  PieceType Piece::Type() {
     return type;
+  }
+
+  PieceColor Piece::Color() {
+    return color;
   }
 
 /*

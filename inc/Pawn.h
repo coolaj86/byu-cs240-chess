@@ -5,7 +5,7 @@
 
 class Pawn : public Piece{
 public:
-	Pawn(int);
+	Pawn(PieceColor);
 	~Pawn();
 private:
 	bool firstMove;

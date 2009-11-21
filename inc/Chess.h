@@ -125,6 +125,7 @@ class Chess
     void _select_piece(int row, int col);			//!< mark a piece as selected (distinguishes between onCellSelects)
     void _deselect_piece();										//!< mark no piece as selected and clear highlights
     void _unhighlight_all();									//!< remove highlights from all squares
+    ImageName _to_image_name(const PieceName piece) const;
     ///@}
 
 };

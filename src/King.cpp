@@ -1,8 +1,9 @@
 #include "King.h"
 
-	King::King(int color) : 
+	King::King(PieceColor color) : 
     Piece::Piece(color)
   {
+    type = KING;
   }
   King::~King()
   {

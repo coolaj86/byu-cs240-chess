@@ -74,7 +74,7 @@ void Chess::_update_board()
     for (int col = 0; col < 8; col++) {
       gui->UnHighlightSquare(row, col);
       gui->ClearPiece(row, col);
-      gui->PlacePiece(row, col, game.WhatPieceIsAt(row, col));
+      gui->PlacePiece(row, col, _to_image_name(game.WhatPieceIsAt(row, col)));
       /*
       if (NULL == game.WhatPieceIsAt(row, col))
       {
@@ -138,6 +138,43 @@ void Chess::_unhighlight_all()
   }
 }
 
+ImageName Chess::_to_image_name(const PieceName piece) const
+{
+  switch(piece) {
+  case NO__PIECE:
+    return NO_IMAGE;
+
+  case B__ROOK:
+    return B_ROOK;
+  case B__KNIGHT:
+    return B_KNIGHT;
+  case B__BISHOP:
+    return B_BISHOP;
+  case B__QUEEN:
+    return B_QUEEN;
+  case B__KING:
+    return B_KING;
+  case B__PAWN:
+    return B_PAWN;
+
+  case W__ROOK:
+    return W_ROOK;
+  case W__KNIGHT:
+    return W_KNIGHT;
+  case W__BISHOP:
+    return W_BISHOP;
+  case W__QUEEN:
+    return W_QUEEN;
+  case W__KING:
+    return W_KING;
+  case W__PAWN:
+    return W_PAWN;
+
+  default:
+    return NO_IMAGE;
+  }
+}
+
 /********Implement These*****************************/
 
 /*
@@ -158,23 +195,28 @@ void Chess::_unhighlight_all()
 void Chess::on_CellSelected(int row, int col, int button)
 {
   cout << "Chess::on_CellSelected nsth" << endl;
-  //g_debug("Chess::on_CellSelected (%d,%d)",row,col);
+  g_debug("Chess::on_CellSelected (%d,%d)",row,col);
 
   if (_piece_is_selected())
   {
+    if (cur_row == row && cur_col == col)
+    {
+      //TODO _deselect_piece(); // fix board logic, then add this back in
+      return;
+    }
     cout << "Using prev" << endl;
-    //g_debug("Using previous selection");
+    g_debug("Using previous selection");
     if (game.MoveFromTo(cur_row, cur_col, row, col))
     {
       cout << "Moved" << endl;
-      //g_debug("Moved Piece");
+      g_debug("Moved Piece");
       _deselect_piece();
       _update_board();
     }
     else
     {
       cout << "Couldn't move" << endl;
-      //g_debug("Could not complete move");
+      g_debug("Could not complete move");
       _deselect_piece();
       _select_piece(row, col);
     }
@@ -182,7 +224,7 @@ void Chess::on_CellSelected(int row, int col, int button)
   else
   {
     cout << "Selected" << endl;
-    //g_debug("Made selection");
+    g_debug("Made selection");
     _deselect_piece();
     _select_piece(row, col);
   }

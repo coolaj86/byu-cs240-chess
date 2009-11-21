@@ -1,6 +1,6 @@
 #include "Pawn.h"
 
-	Pawn::Pawn(int color) : 
+	Pawn::Pawn(PieceColor color) : 
     Piece::Piece(color)
   {
   }

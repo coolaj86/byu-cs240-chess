@@ -5,7 +5,7 @@
 
 class Rook : public Piece {
 public:
-	Rook(int);
+	Rook(PieceColor);
 	~Rook();
 };
 

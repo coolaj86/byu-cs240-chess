@@ -1,8 +1,9 @@
 #include "Bishop.h"
 
-	Bishop::Bishop(int color) : 
+	Bishop::Bishop(PieceColor color) : 
     Piece::Piece(color)
   {
+    type = BISHOP;
   }
   Bishop::~Bishop()
   {

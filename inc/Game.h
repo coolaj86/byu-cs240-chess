@@ -20,7 +20,7 @@ public:
 
   void NewGame();																							//!< Frees memory of old game and allocates a new one
   // TODO use bitwise OR-ing to simplify these three
-  ImageName WhatPieceIsAt(int row, int col) const;						//!< Returns int value (ImageName) of Piece
+  PieceName WhatPieceIsAt(int row, int col) const;						//!< Returns int value (ImageName) of Piece
   PieceType WhatTypeIsAt(int row, int col) const;							//!< Returns int value (PieceType) of Piece
   PieceColor WhatColorIsAt(int row, int col) const;						//!< Returns int value (PieceColor) of Piece
   PieceName PieceNameAt(int row, int col) const;							//!< Get just the name of the piece
@@ -49,8 +49,6 @@ private:
   Board board;
   //vector<Move> history;
   int whose_turn;
-
-  ImageName _convert_piece_to_image_name(const PieceName piece) const;	//!< Purposefully Violates the Facade design
 
   void _init();
   void _init_pieces();

@@ -59,7 +59,11 @@ int Game::WhoseTurn() const
 
 bool Game::HasTurn(int row, int col) const
 {
-    return (whose_turn == WhatColorIsAt(row, col));
+  Piece& piece = board.PieceAt(row, col);
+  if (NULL != &piece)
+    return (whose_turn == piece.Color());
+  else
+    return false;
 }
 
 void Game::_init_pieces() {
@@ -109,112 +113,9 @@ void Game::Load(string filename)
   // loop through
 }
 
-ImageName Game::_convert_piece_to_image_name(const PieceName piece) const
-{
-  switch(piece) {
-  case NO__PIECE:
-    return NO_IMAGE;
-
-  case B__ROOK:
-    return B_ROOK;
-  case B__KNIGHT:
-    return B_KNIGHT;
-  case B__BISHOP:
-    return B_BISHOP;
-  case B__QUEEN:
-    return B_QUEEN;
-  case B__KING:
-    return B_KING;
-  case B__PAWN:
-    return B_PAWN;
-
-  case W__ROOK:
-    return W_ROOK;
-  case W__KNIGHT:
-    return W_KNIGHT;
-  case W__BISHOP:
-    return W_BISHOP;
-  case W__QUEEN:
-    return W_QUEEN;
-  case W__KING:
-    return W_KING;
-  case W__PAWN:
-    return W_PAWN;
-
-  default:
-    return NO_IMAGE;
-  }
-}
-
-ImageName Game::WhatPieceIsAt(int row, int col) const
+PieceName Game::WhatPieceIsAt(int row, int col) const
 {
   assert((row > BLACK_START && row < BLACK_END)
       || (row < WHITE_START && row > WHITE_END));
-  return _convert_piece_to_image_name(PieceNameAt(row, col));
-}
-
-PieceColor Game::WhatColorIsAt(int row, int col) const
-{
-  // if NO_PIECE return NO_PIECE
-  // return (P_WHITE & board.PieceNameAt(row, col)) ? WHITE : BLACK
-  switch(PieceNameAt(row, col)) {
-  case NO__PIECE:
-    return NO_COLOR;
-
-  case B__ROOK:
-  case B__KNIGHT:
-  case B__BISHOP:
-  case B__QUEEN:
-  case B__KING:
-  case B__PAWN:
-    return _BLACK_;
-
-  case W__ROOK:
-  case W__KNIGHT:
-  case W__BISHOP:
-  case W__QUEEN:
-  case W__KING:
-  case W__PAWN:
-    return _WHITE_;
-
-  default:
-    return NO_COLOR;
-  }
-  return NO_COLOR;
-}
-
-PieceType Game::WhatTypeIsAt(int row, int col) const
-{
-  switch(PieceNameAt(row, col)) {
-  case NO__PIECE:
-    return NO_TYPE;
-
-  case B__ROOK:
-  case W__ROOK:
-    return ROOK;
-
-  case B__KNIGHT:
-  case W__KNIGHT:
-    return KNIGHT;
-
-  case B__BISHOP:
-  case W__BISHOP:
-    return BISHOP;
-
-  case B__QUEEN:
-  case W__QUEEN:
-    return QUEEN;
-
-  case B__KING:
-  case W__KING:
-    return KING;
-
-  case B__PAWN:
-  case W__PAWN:
-    return PAWN;
-
-  default:
-    return NO_TYPE;
-  }
-  return NO_TYPE;
+  return PieceNameAt(row, col);
 }

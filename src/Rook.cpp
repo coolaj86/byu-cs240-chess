@@ -1,9 +1,9 @@
 #include "Rook.h"
 
-	Rook::Rook(int color) :
+	Rook::Rook(PieceColor color) :
     Piece::Piece(color)
   {
-  
+    type = ROOK;
   }
 	Rook::~Rook()
   {
