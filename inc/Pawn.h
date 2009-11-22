@@ -5,10 +5,12 @@
 
 class Pawn : public Piece{
 public:
-	Pawn(PieceColor);
-	~Pawn();
+  Pawn(PieceColor);
+  ~Pawn();
+  std::vector<Cell> Moves(Board&, int row, int col);			//!< Given a cell, returns the cells to which the piece can move from that cell
+  std::vector<Cell> Moves();
 private:
-	bool firstMove;
+  bool firstMove;
 };
 
 #endif

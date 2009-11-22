@@ -201,7 +201,7 @@ void Chess::on_CellSelected(int row, int col, int button)
   {
     if (cur_row == row && cur_col == col)
     {
-      //TODO _deselect_piece(); // fix board logic, then add this back in
+      _deselect_piece();
       return;
     }
     cout << "Using prev" << endl;
@@ -295,6 +295,7 @@ void Chess::on_LoadGame()
 {
   g_debug("Chess::on_LoadGame");
   game.Load(gui->SelectLoadFile());
+  _update_board();
   /*
   Called when someone selects 'Open' from the toolbar, 'Game' menu, or presses 'Ctrl-O'.
   */
@@ -304,6 +305,7 @@ void Chess::on_UndoMove()
 {
   g_debug("Chess::on_UndoMove");
   game.Undo();
+  _update_board();
   /*
   Called when someone selects 'Undo' from the toolbar, 'Game' menu, or presses 'Ctrl-Z'.
   */

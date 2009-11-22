@@ -15,7 +15,10 @@ Game::Game() {
 }
 void Game::_init()
 {
-  NewGame();
+  board.Clear();
+  //history = vector<Move>;
+  whose_turn = WHITE;
+  _init_pieces();
 }
 
 Game::~Game() {
@@ -23,13 +26,12 @@ Game::~Game() {
 }
 void Game::_clear()
 {
+  board.Clear();
 }
 
 void Game::NewGame() {
-  //board = Board(); 					// done by constructor
-  //history = vector<Move>;
-  whose_turn = WHITE;
-  _init_pieces();
+  _clear();
+  _init();
 }
 
 vector<Cell> Game::WhereCanPieceMoveFrom(int row, int col)
@@ -37,19 +39,43 @@ vector<Cell> Game::WhereCanPieceMoveFrom(int row, int col)
   cout << "WhereCanPieceMoveFrom" << endl;
   // TODO limit
   vector<Cell> cells;
-  for (int i = 2; i < 6; i++)
-    for (int j = 2; j < 6; j++)
-      cells.push_back(Cell(i,j));
+
+  Piece* piece = board.PieceAt(row, col);
+  if (NULL == piece)
+    return cells;
+
+  cells = piece->Moves();
   return cells;
   cout << "WhereCanPieceMoveFrom End" << endl;
 }
 
 bool Game::MoveFromTo(int row1, int col1, int row2, int col2)
 {
-  // TODO limit
-  board.MoveFromTo(row1, col1, row2, col2);
-  whose_turn = (whose_turn == WHITE) ? BLACK : WHITE;
-  return true;
+  Piece* piece = board.PieceAt(row1, col1);
+  if (NULL == piece)
+    return false;
+
+  Cell cell(row2, col2);
+  vector<Cell> cells = piece->Moves();
+  for (int i = 0; i < cells.size(); i++)
+  {
+    if (cells[i] == cell)
+    {
+      board.MoveFromTo(row1, col1, row2, col2);
+      // TODO
+      /*
+      if (_king_in_check())
+      {
+        board.Undo();
+      }
+      */
+      //TODO replace with method
+      whose_turn = (whose_turn == WHITE) ? BLACK : WHITE;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 int Game::WhoseTurn() const
@@ -59,9 +85,9 @@ int Game::WhoseTurn() const
 
 bool Game::HasTurn(int row, int col) const
 {
-  Piece& piece = board.PieceAt(row, col);
-  if (NULL != &piece)
-    return (whose_turn == piece.Color());
+  Piece* piece = board.PieceAt(row, col);
+  if (NULL != piece)
+    return (whose_turn == piece->Color());
   else
     return false;
 }
@@ -91,16 +117,19 @@ void Game::_init_pieces() {
 }
 
 PieceName Game::PieceNameAt(int row, int col) const {
-  Piece& piece = board.PieceAt(row, col);
-  if (NULL != &piece)
-    return piece.Name();
+  Piece* piece = board.PieceAt(row, col);
+  if (NULL != piece)
+    return piece->Name();
   else
     return NO__PIECE;
 }
 
 void Game::Undo()
 {
-  //board.undo
+  if (board.Undo())
+  {
+    whose_turn = (whose_turn == WHITE) ? BLACK : WHITE;
+  }
 }
 
 void Game::Save(string filename)

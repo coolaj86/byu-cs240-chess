@@ -6,11 +6,20 @@ class Cell
 {
   public:
     Cell();
+    Cell(Cell const&);
     Cell(int row, int col);
     ~Cell();
 
+    Cell& operator=(Cell const&);
+    bool operator==(Cell const&) const;
+
     int row;
     int col;
+
+  private:
+    void _init();
+    void _clear();
+    void _copy(Cell const&);
 };
 
 #endif

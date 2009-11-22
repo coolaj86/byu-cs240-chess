@@ -9,6 +9,24 @@
   {
   }
 
+  std::vector<Cell> King::Moves()
+  {
+    std::vector<Cell> cells;
+    // Forward / BackWard
+    _cell_advancing(cells, 1, 0);
+    _cell_advancing(cells, -1, 0);
+    // Left / Right
+    _cell_advancing(cells, 0, 1);
+    _cell_advancing(cells, 0, -1);
+
+    // Diagonals
+    _cell_advancing(cells, -1, 1);
+    _cell_advancing(cells, 1, 1);
+    _cell_advancing(cells, 1, -1);
+    _cell_advancing(cells, -1, -1);
+    return cells;
+  }
+
 	/* A king can move in any direction to a null spot on the board where he cannot be attacked*/
 /*
 	Set<Square> King::Moves(const Board board, Square _square) {

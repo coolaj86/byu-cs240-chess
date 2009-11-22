@@ -5,11 +5,8 @@
 #include "ChessDebug.h"
 #include "Cell.h"
 
-#include <set>
-
-/*
- *  TODO Change these enums to be useful for bitwise calculations
- */
+//#include <set>
+#include <vector>
 
 enum PieceName {
   NO__PIECE=0,
@@ -49,7 +46,9 @@ enum PieceColor {
   WHITE=-1
   };
 
+class Board;
 class Piece {
+  friend class Board;
 public:
   Piece(PieceColor);
   ~Piece();
@@ -58,31 +57,27 @@ public:
   PieceType Type();
   PieceColor Color();
 
+  void UpdateLocation(int row, int col);
+  void UpdateLocation(Cell const&);
+
   void Test();
 
-  /*
-   * I don't like how the piece assumes things
-   * about the board... but I don't know a cleaner
-   * way to do this simply.
-   *
-   * Bleh! C and it's no multiple return types!
-   * Give me a real /programming/ language next
-   * time will ya? We're hardly CEs y'know.
-   */
-  /*!
-   * The piece assumes an 8x8 board.
-   * given a row, col it will return cells
-   * to which it can move (depending on the color, the Game will handle
-   * the logic from that point on
-   */
-  //virtual set<Cell> Moves(int row, int col, board);			//!< Given a cell, returns the cells to which the piece can move from that cell
+  virtual std::vector<Cell> Moves();	                  				//!< Returns the cells to which a piece can currently move
 
 protected:
+  Board* board;
   PieceType type;
   PieceColor color;
+  int row;
+  int col;
+
+  void _cells_advancing(std::vector<Cell>& cells, int f_b, int l_r);				//!< Gather cells while advancing in the direction of front,back,left,right.
+  void _cell_advancing(std::vector<Cell>& cells, int f_b, int l_r);				//!< Gather cells while advancing in the direction of front,back,left,right.
 
   void _init();
   void _copy();
   void _clear();
 };
+
+#include "Board.h"
 #endif

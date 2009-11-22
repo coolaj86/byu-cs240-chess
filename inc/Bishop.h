@@ -5,8 +5,9 @@
 
 class Bishop : public Piece {
 public:
-	Bishop(PieceColor);
-	~Bishop();
+  Bishop(PieceColor);
+  ~Bishop();
+  std::vector<Cell> Moves();
 };
 
 #endif

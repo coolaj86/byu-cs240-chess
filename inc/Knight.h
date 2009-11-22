@@ -7,6 +7,7 @@ class Knight : public Piece {
 public:
 	Knight(PieceColor);
 	~Knight();
+  std::vector<Cell> Moves();
 };
 
 #endif

@@ -7,6 +7,7 @@ class King : public Piece{
 public:
 	King(PieceColor);
 	~King();
+  std::vector<Cell> Moves();
 private:
 	bool firstMove;
 };

@@ -45,6 +45,8 @@ Y
  ******************************************
  ******************************************/
 
+using namespace std;
+
 /*!
  * Handles Memory Management and Mapping for the Board array and all pieces
  * Allows safe manipulation of the board in any way.
@@ -59,16 +61,25 @@ public:
   Board& operator=(Board&);																	//!< Copy assignment
   ~Board();																									//!< Clears the board
 
-  Piece& PieceAt(int row, int col) const;										//!< Retrieve the piece
-  Piece* RemovePieceAt(int row, int col);										//!< Remove and delete the piece
+  Piece* PieceAt(int row, int col) const;										//!< Retrieve the piece
+  Piece* PieceAt(Cell) const;
+  void RemovePieceAt(int row, int col);											//!< Remove and delete the piece
   void PlacePiece(int row, int col, Piece *);								//!< Place a piece at row,col; removing existing piece if necessary
   void MoveFromTo(int row1, int col1, int row2, int col2);	//!< Safetly (memory) moves piece from one square to another and updates history
+  bool ValidCell(int row, int col) const;										//!< The cell is in the bounds of the array
+  bool ValidCell(Cell) const;
+  bool Undo();
+
+  void Clear();
   void Test();																							//!< Runs Unit Tests on the Board
 
 private:
   Piece** board;																						//!< Flat array, which is mapped
+  // TODO handle pawn promotion without adding setup to history
+  vector< vector< Piece* > > history;														//!< An undoable history of moves
+
   void _init();																							//!< Setup a new board
-  int	_map(int row, int col);																//!< Does Bounds checking and mapping
+  int	_map(int row, int col) const;													//!< Maps row,col to array, doesn't Bounds check
   void _copy();																							//!< Copy helper
   void _clear();																						//!< Free all memory in the board
 

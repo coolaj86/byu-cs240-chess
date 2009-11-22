@@ -5,8 +5,9 @@
 
 class Rook : public Piece {
 public:
-	Rook(PieceColor);
-	~Rook();
+  Rook(PieceColor);
+  ~Rook();
+  std::vector<Cell> Moves();
 };
 
 #endif

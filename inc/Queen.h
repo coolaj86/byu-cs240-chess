@@ -5,8 +5,11 @@
 
 class Queen : public Piece {
 public:
-	Queen(PieceColor);
-	~Queen();
+  Queen(PieceColor);
+  ~Queen();
+
+  std::vector<Cell> Moves();
+
 };
 
 #endif
