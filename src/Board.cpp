@@ -47,12 +47,20 @@ void Board::PlacePiece(int row, int col, Piece* piece)
   piece->UpdateLocation(row, col);
 }
 
-void Board::MoveFromTo(int row1, int col1, int row2, int col2)
+bool Board::MoveFromTo(Cell const& from, Cell const& to)
+{
+  return MoveFromTo(from.row, from.col, to.row, to.col);
+}
+
+bool Board::MoveFromTo(int row1, int col1, int row2, int col2)
 {
   if (!ValidCell(row1, col1) || !ValidCell(row2, col2))
-    return;
-  if (!board[(row1 * 8) + col1])
-    return;
+    {std::cout << "silly1" << std::endl; return false;}
+  if (!board[_map(row1, col1)]) // can't move a nothing to a something
+    {std::cout
+      << " row1: " << row1 << " col1: " << col1
+      << " row2: " << row2 << " col2: " << col2
+      << " sillyness..." << std::endl; return false;}
 
   vector<Piece*> move;
   Piece* opponent = NULL;
@@ -64,18 +72,19 @@ void Board::MoveFromTo(int row1, int col1, int row2, int col2)
   board[_map(row1, col1)] = NULL;
 
   Piece* piece = board[_map(row2, col2)];
-  Piece* copy = new Piece(*piece);
+  Piece* copy = piece->Clone();
   move.push_back(copy);											// original
   piece->UpdateLocation(row2, col2);
-  copy = new Piece(*piece);
+  copy = piece->Clone();
   move.push_back(copy);											// new loc
   if (opponent)
   {
-    move.push_back(new Piece(*opponent));		// deleted opponent
+    move.push_back(opponent->Clone());		// deleted opponent
     delete opponent;
   }
 
   history.push_back(move);
+  return true;
 }
 bool Board::Undo()
 {
@@ -89,7 +98,7 @@ bool Board::Undo()
   }
   piece = move[1];												// new location
   RemovePieceAt(piece->row, piece->col);
-  if (opponent) { PlacePiece(opponent->row, opponent->col, piece); }
+  if (opponent) { PlacePiece(opponent->row, opponent->col, opponent); }
   piece = move[0];												// original location
   PlacePiece(piece->row, piece->col, piece);
 
@@ -115,6 +124,47 @@ Piece* Board::PieceAt(Cell cell) const {
   return PieceAt(cell.row, cell.col);
 }
 
+King* Board::FriendKing(Piece const* piece) const {
+  return FriendKing(piece->Color());
+}
+King* Board::FriendKing(PieceColor piece_color) const {
+  Piece * king;
+  for (int _row = 0; _row < 8; _row++)
+  {
+    for (int _col = 0; _col < 8; _col++)
+    {
+      if ((king = PieceAt(_row,_col))
+        && KING == king->type
+        && piece_color == king->color)
+      { return (King*) king; }
+    }
+  }
+  // a little game logic exception...
+  // perhaps out of place, but I don't care
+  throw new exception();
+  return NULL;
+}
+
+King* Board::EnemyKing(Piece const* piece) const {
+  return EnemyKing(piece->Color());
+}
+King* Board::EnemyKing(PieceColor piece_color) const {
+  Piece * king;
+  for (int _row = 0; _row < 8; _row++)
+  {
+    for (int _col = 0; _col < 8; _col++)
+    {
+      if ((king = PieceAt(_row,_col))
+        && KING == king->type
+        && piece_color != king->color)
+      { return (King*) king; }
+    }
+  }
+  // a little game logic exception...
+  // perhaps out of place, but I don't care
+  throw new exception();
+  return NULL;
+}
 
 bool Board::ValidCell(Cell cell) const {
   return ValidCell(cell.row, cell.col);

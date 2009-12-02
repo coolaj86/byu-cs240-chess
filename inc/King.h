@@ -3,13 +3,15 @@
 
 #include "Piece.h"
 
-class King : public Piece{
+class King : public Piece {
 public:
-	King(PieceColor);
-	~King();
+  King(PieceColor);
+  ~King();
+  Piece * Clone();
   std::vector<Cell> Moves();
+
 private:
-	bool firstMove;
+  bool firstMove;
 };
 
 #endif

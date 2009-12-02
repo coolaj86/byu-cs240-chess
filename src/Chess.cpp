@@ -90,6 +90,10 @@ void Chess::_update_board()
 
   string banner = (WHITE == game.WhoseTurn()) ? "White" : "Black";
   banner.append(" - it's your turn!");
+  if (game.Check(game.WhoseTurn())) { banner.append(" - You're in Check!!");}
+  EndGameType game_over = game.GameOver();
+  if (game_over == CHECKMATE) { banner.append(" - You're in Checkmate!!");}
+  if (game_over == STALEMATE) { banner.append(" - You're in Stalemate!!");}
   gui->SetStatusBar(banner.c_str());
 }
 
@@ -118,7 +122,7 @@ void Chess::_select_piece(int row, int col)
   cur_col = col;
   gui->HighlightSquare(row,col, YELLOW_SQUARE);
 
-  vector<Cell> cells = game.WhereCanPieceMoveFrom(row, col);
+  vector<Cell> cells = game.ValidMoves(row, col);
   if (cells.size() > 0)
   {
     gui->HighlightSquare(row,col, GREEN_SQUARE);
@@ -204,11 +208,11 @@ void Chess::on_CellSelected(int row, int col, int button)
       _deselect_piece();
       return;
     }
-    cout << "Using prev" << endl;
+    cout << "Using previous selection" << endl;
     g_debug("Using previous selection");
     if (game.MoveFromTo(cur_row, cur_col, row, col))
     {
-      cout << "Moved" << endl;
+      cout << "Moved piece" << endl;
       g_debug("Moved Piece");
       _deselect_piece();
       _update_board();

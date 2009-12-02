@@ -15,20 +15,25 @@
     assert (WHITE == _color || BLACK == _color);
     color = _color;
   }
+  Piece * Piece::Clone()
+  {
+    throw new exception();
+    return NULL;
+  }
 
   Piece::~Piece() {
     return;
   }
 
-  PieceName Piece::Name() {
+  PieceName Piece::Name() const {
     return (PieceName) (type + color);
   }
 
-  PieceType Piece::Type() {
+  PieceType Piece::Type() const {
     return type;
   }
 
-  PieceColor Piece::Color() {
+  PieceColor Piece::Color() const {
     return color;
   }
 
@@ -41,6 +46,21 @@
   {
     row = other.row;
     col = other.col;
+  }
+
+  Cell Piece::Location()
+  {
+    return Cell(row, col);
+  }
+
+  bool Piece::CouldTake(Cell cell)
+  {
+    std::vector<Cell> moves = Moves();
+    for (int i = 0; i < moves.size(); i++)
+    {
+      if (moves[i] == cell) { return true; }
+    }
+    return false;
   }
 
   std::vector<Cell> Piece::Moves()

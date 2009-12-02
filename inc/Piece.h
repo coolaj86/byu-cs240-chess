@@ -53,16 +53,20 @@ public:
   Piece(PieceColor);
   ~Piece();
 
-  PieceName Name();
-  PieceType Type();
-  PieceColor Color();
+  PieceName Name() const;
+  PieceType Type() const;
+  PieceColor Color() const;
 
   void UpdateLocation(int row, int col);
   void UpdateLocation(Cell const&);
 
   void Test();
 
-  virtual std::vector<Cell> Moves();	                  				//!< Returns the cells to which a piece can currently move
+  virtual std::vector<Cell> Moves();	   										       				//!< Returns the cells to which a piece can currently move
+  virtual Piece * Clone();																								//!< Returns a specific type of piece
+  bool CouldTake(Cell);
+  bool CanSaveKing();
+  Cell Location();
 
 protected:
   Board* board;
@@ -71,13 +75,14 @@ protected:
   int row;
   int col;
 
-  void _cells_advancing(std::vector<Cell>& cells, int f_b, int l_r);				//!< Gather cells while advancing in the direction of front,back,left,right.
+  void _cells_advancing(std::vector<Cell>& cells, int f_b, int l_r);			//!< Gather cells while advancing in the direction of front,back,left,right.
   void _cell_advancing(std::vector<Cell>& cells, int f_b, int l_r);				//!< Gather cells while advancing in the direction of front,back,left,right.
 
   void _init();
   void _copy();
   void _clear();
 };
+class King;
 
 #include "Board.h"
 #endif

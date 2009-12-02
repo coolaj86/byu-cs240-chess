@@ -12,6 +12,12 @@
 
 using namespace std;
 
+enum EndGameType {
+  PLAY = 500,
+  CHECKMATE = 100,
+  STALEMATE = -100
+};
+
 class Game {
 public:
   Game();
@@ -33,11 +39,14 @@ public:
    * has an enemy, or a friend, and add to the vector
    * accordingly (will probably change to set)
    */
-  vector<Cell> WhereCanPieceMoveFrom(int row, int col);				//!< Get a set of cell coordinates which imply legal moves
+  vector<Cell> ValidMoves(int row, int col);									//!< Get a set of cell coordinates which imply legal moves
+  vector<Cell> ValidMoves(Cell);
 
   bool MoveFromTo(int row1, int col1, int row2, int col2);		//!< Moves a piece, if any, and returns true if possible and updates history, changes the turn on success
-  int WhoseTurn() const;																			//!< Return whose turn it is
+  PieceColor WhoseTurn() const;																			//!< Return whose turn it is
   bool HasTurn(int row, int col) const;												//!< (PieceColor == TurnColor) ? true : false
+  bool Check(PieceColor) const;
+  EndGameType GameOver();
 
   void Undo();																								//!< Pops move from history and performs the reverse
   void Save(string filename);																	//!< Writes history to xml
@@ -48,7 +57,7 @@ public:
 private:
   Board board;
   //vector<Move> history;
-  int whose_turn;
+  PieceColor whose_turn;
 
   void _init();
   void _init_pieces();

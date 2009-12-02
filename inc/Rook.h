@@ -6,6 +6,7 @@
 class Rook : public Piece {
 public:
   Rook(PieceColor);
+  Piece * Clone();
   ~Rook();
   std::vector<Cell> Moves();
 };

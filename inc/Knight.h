@@ -6,6 +6,7 @@
 class Knight : public Piece {
 public:
 	Knight(PieceColor);
+  Piece * Clone();
 	~Knight();
   std::vector<Cell> Moves();
 };

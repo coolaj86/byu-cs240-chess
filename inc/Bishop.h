@@ -6,6 +6,7 @@
 class Bishop : public Piece {
 public:
   Bishop(PieceColor);
+  Piece * Clone();
   ~Bishop();
   std::vector<Cell> Moves();
 };

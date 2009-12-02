@@ -63,9 +63,14 @@ public:
 
   Piece* PieceAt(int row, int col) const;										//!< Retrieve the piece
   Piece* PieceAt(Cell) const;
+  King* FriendKing(Piece const*) const;
+  King* EnemyKing(Piece const*) const;
+  King* FriendKing(PieceColor const) const;
+  King* EnemyKing(PieceColor const) const;
   void RemovePieceAt(int row, int col);											//!< Remove and delete the piece
   void PlacePiece(int row, int col, Piece *);								//!< Place a piece at row,col; removing existing piece if necessary
-  void MoveFromTo(int row1, int col1, int row2, int col2);	//!< Safetly (memory) moves piece from one square to another and updates history
+  bool MoveFromTo(int row1, int col1, int row2, int col2);	//!< Safetly (memory) moves piece from one square to another and updates history
+  bool MoveFromTo(Cell const& from, Cell const& to);
   bool ValidCell(int row, int col) const;										//!< The cell is in the bounds of the array
   bool ValidCell(Cell) const;
   bool Undo();

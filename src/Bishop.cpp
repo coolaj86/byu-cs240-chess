@@ -5,6 +5,15 @@
   {
     type = BISHOP;
   }
+  Piece * Bishop::Clone()
+  {
+    Bishop * bishop = new Bishop(color);
+    bishop->type = type;
+    bishop->row = row;
+    bishop->col = col;
+    bishop->board = board;
+    return (Piece *) bishop;
+  }
   Bishop::~Bishop()
   {
   }

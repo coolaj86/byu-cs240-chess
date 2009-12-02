@@ -5,6 +5,15 @@
   {
     type = ROOK;
   }
+  Piece * Rook::Clone()
+  {
+    Rook * rook = new Rook(color);
+    rook->type = type;
+    rook->row = row;
+    rook->col = col;
+    rook->board = board;
+    return (Piece *) rook;
+  }
   Rook::~Rook()
   {
   }

@@ -5,6 +5,15 @@
   {
     type = QUEEN;
   }
+  Piece * Queen::Clone()
+  {
+    Queen * queen = new Queen(color);
+    queen->type = type;
+    queen->row = row;
+    queen->col = col;
+    queen->board = board;
+    return (Piece *) queen;
+  }
   Queen::~Queen()
   {
   }
