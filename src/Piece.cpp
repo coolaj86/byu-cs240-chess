@@ -7,8 +7,6 @@
 
 #include "Piece.h"
 
-#include <iostream>
-
   Piece::Piece(PieceColor _color) :
     type(PAWN)
   {
@@ -35,6 +33,138 @@
 
   PieceColor Piece::Color() const {
     return color;
+  }
+
+  std::string Piece::TypeString() const {
+    switch (type)
+    {
+      case PAWN:
+        return "pawn";
+        break;
+      case ROOK:
+        return "rook";
+        break;
+      case BISHOP:
+        return "bishop";
+        break;
+      case KNIGHT:
+        return "knight";
+        break;
+      case KING:
+        return "king";
+        break;
+      case QUEEN:
+        return "queen";
+        break;
+      case NO_TYPE:
+        break;
+    }
+    return string("error");
+  }
+
+  std::string Piece::ColorString() const {
+    switch (color)
+    {
+      case WHITE:
+        return std::string("white");
+         break;
+      case BLACK:
+        return std::string("black");
+        break;
+      case NO_COLOR:
+        break;
+    }
+    return string("error");
+  }
+
+  Piece * Piece::Create(PieceType type, PieceColor color)
+  {
+    return Create(type, color, -1, -1);
+  }
+
+  Piece * Piece::Create(PieceType type, PieceColor color, int row, int col)
+  {
+    Piece * piece;
+    switch (type)
+    {
+      case PAWN:
+        piece = new Pawn(color);
+        break;
+      case ROOK:
+        piece = new Rook(color);
+        break;
+      case KNIGHT:
+        piece = new Knight(color);
+        break;
+      case BISHOP:
+        piece = new Bishop(color);
+        break;
+      case KING:
+        piece = new King(color);
+        break;
+      case QUEEN:
+        piece = new Queen(color);
+        break;
+      case NO_TYPE:
+        throw new exception();
+        break;
+    }
+    piece->UpdateLocation(row, col);
+    return piece;
+  }
+
+  Piece * Piece::FromString(std::string piece_str)
+  {
+    string::const_iterator piece_begin = piece_str.begin();
+    string::const_iterator piece_end = piece_str.end();
+
+    boost::match_results<string::const_iterator> matches;
+
+    boost::regex
+      //piece_re("<\\s*piece.*?\\/>", boost::regex::perl|boost::regex::icase),
+      row_re("row\\s*=\\s*(['\"]?)(.*?)\\1", boost::regex::perl|boost::regex::icase),
+      col_re("column\\s*=\\s*(['\"]?)(.*?)\\1", boost::regex::perl|boost::regex::icase),
+      color_re("color\\s*=\\s*(['\"]?)(.*?)\\1", boost::regex::perl|boost::regex::icase),
+      type_re("type\\s*=\\s*(['\"]?)(.*?)\\1", boost::regex::perl|boost::regex::icase);
+
+    if (!(regex_search(piece_begin, piece_end, matches, type_re)))
+      { std::cout << "error parsing piece" << std::endl; return NULL; }
+    std::string type_str = matches[2];
+
+    if (!(regex_search(piece_begin, piece_end, matches, color_re)))
+      { std::cout << "error parsing piece" << std::endl; return NULL; }
+    std::string color_str = matches[2];
+
+    if (!(regex_search(piece_begin, piece_end, matches, row_re)))
+      { std::cout << "error parsing piece" << std::endl; return NULL; }
+    std::string row = matches[2];
+
+    if (!(regex_search(piece_begin, piece_end, matches, col_re)))
+      { std::cout << "error parsing piece" << std::endl; return NULL; }
+    std::string col = matches[2];
+
+  PieceColor color = (color_str == "white") ? WHITE : BLACK;
+
+  PieceType type = NO_TYPE;
+  type = (type_str == "pawn") ? PAWN : type;
+  type = (type_str == "rook") ? ROOK : type;
+  type = (type_str == "bishop") ? BISHOP : type;
+  type = (type_str == "knight") ? KNIGHT : type;
+  type = (type_str == "king") ? KING : type;
+  type = (type_str == "queen") ? QUEEN : type;
+
+  return Create(type, color, atoi(row.c_str()), atoi(col.c_str()));
+  }
+
+  std::string Piece::ToString() const {
+    std::stringstream xml;
+    xml << "<piece ";
+    xml << "type=\"" << TypeString() << "\" ";
+    xml << "color=\"" << ColorString() << "\" ";
+    xml << "column=\"" << col << "\" ";
+    xml << "row=\"" << row << "\" ";
+    xml << "/>";
+    return xml.str();
   }
 
   void Piece::UpdateLocation(int _row, int _col)

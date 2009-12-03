@@ -16,7 +16,6 @@ Game::Game() {
 void Game::_init()
 {
   board.Clear();
-  //history = vector<Move>;
   whose_turn = WHITE;
   _init_pieces();
 }
@@ -41,8 +40,6 @@ vector<Cell> Game::ValidMoves(Cell cell)
 
 vector<Cell> Game::ValidMoves(int row, int col)
 {
-  cout << "ValidMoves" << endl;
-  // TODO limit
   vector<Cell> moves;
 
   Piece* piece = board.PieceAt(row, col);
@@ -52,7 +49,6 @@ vector<Cell> Game::ValidMoves(int row, int col)
   Cell location = piece->Location();
   moves = piece->Moves();
 
-  std::cout << "Number of Moves: " << moves.size() << std::endl;
   std::vector<Cell> filtered_moves;
   for (int i = 0; i < moves.size(); i++)
   {
@@ -73,6 +69,11 @@ vector<Cell> Game::ValidMoves(int row, int col)
   return filtered_moves;
 }
 
+bool Game::MoveFromTo(Cell from, Cell to)
+{
+  return MoveFromTo(from.row, from.col, to.row, to.col);
+}
+
 bool Game::MoveFromTo(int row1, int col1, int row2, int col2)
 {
   Piece* piece = board.PieceAt(row1, col1);
@@ -86,14 +87,6 @@ bool Game::MoveFromTo(int row1, int col1, int row2, int col2)
     if (cells[i] == cell)
     {
       board.MoveFromTo(row1, col1, row2, col2);
-      // TODO
-      /*
-      if (_king_in_check())
-      {
-        board.Undo();
-      }
-      */
-      //TODO replace with method
       whose_turn = (whose_turn == WHITE) ? BLACK : WHITE;
       return true;
     }
@@ -201,14 +194,143 @@ void Game::Undo()
   }
 }
 
-void Game::Save(string filename)
+void Game::Save(ostream& xml)
 {
-  // loop through
+  xml << "<chessgame>" << endl;
+  xml << "\t<board>" << endl;
+  Piece * piece;
+  for (int _row = 0; _row < 8; _row++)
+  {
+    for (int _col = 0; _col < 8; _col++)
+    {
+      Cell cell = Cell(_row, _col);
+      if ((piece = board.PieceAt(cell)))
+      {
+        xml << "\t\t" << piece->ToString() << endl;
+      }
+    }
+  }
+  xml << "\t</board>" << endl;
+  xml << "\t<history>" << endl;
+  for (int i = 0; i < board.history.size(); i++)
+  {
+    xml << "\t\t<move>" << endl;
+    vector< Piece* > pieces = board.history[i];
+    xml << "\t\t\t" << pieces[0]->ToString() << endl;
+    xml << "\t\t\t" << pieces[1]->ToString() << endl;
+    if (3 == pieces.size()) // opponent
+    {
+      xml << "\t\t\t" << pieces[2]->ToString() << endl;;
+    }
+    xml << "\t\t</move>" << endl;
+  }
+  xml << "\t</history>" << endl;
+  xml << "</chessgame>" << endl;
 }
 
-void Game::Load(string filename)
+void Game::Load(istream& xml)
 {
-  // loop through
+  board.Clear();
+  //http://www.gskinner.com/RegExr/
+  std::string str((std::istreambuf_iterator<char>(xml)), std::istreambuf_iterator<char>());
+
+  // remove excessive whitespace
+  boost::regex ws_re("[\\s\n\r]+");
+  str = regex_replace(str, ws_re, " ");
+
+  // remove carrot whitespace
+  ws_re = boost::regex("<\\s+");
+  str = regex_replace(str, ws_re, "<");
+  ws_re = boost::regex("</\\s+");
+  str = regex_replace(str, ws_re, "</");
+  ws_re = boost::regex("\\s+>");
+  str = regex_replace(str, ws_re, ">");
+
+  string::const_iterator begin;
+  string::const_iterator end;
+
+  boost::regex
+    board_re("<\\s*chessgame\\s*>.*?<\\s*board\\s*>(.*?)</\\s*board>.*?</\\s*chessgame\\s*>",
+      boost::regex::perl|boost::regex::icase),
+    history_re("<\\s*chessgame\\s*>.*?<\\s*history\\s*>(.*?)</\\s*history>.*?</\\s*chessgame\\s*>",
+      boost::regex::perl|boost::regex::icase),
+    move_re("<\\s*move\\s*>(.*?)</\\s*move\\s*>", boost::regex::perl|boost::regex::icase),
+    piece_re("<\\s*piece.*?\\/>", boost::regex::perl|boost::regex::icase);
+
+  boost::match_results<string::const_iterator> matches;
+
+  begin = str.begin();
+  end = str.end();
+  if (!(regex_search(begin, end, matches, board_re)))
+  {
+    std::cout << "didn't find board" << endl;
+    return;
+  }
+  std::string board_str = matches[1];
+
+  std::string history_str;
+  if (regex_search(begin, end, matches, history_re))
+  {
+    history_str = matches[1];
+  }
+  else
+  {
+    std::cout << "did find history" << endl;
+  }
+  str.clear();
+
+
+  // TODO make function
+  begin = board_str.begin();
+  end = board_str.end();
+  if (!(regex_search(begin, end, matches, piece_re)))
+  {
+    std::cout << "didn't find pieces" << endl;
+    return;
+  }
+  while (regex_search(begin, end, matches, piece_re))
+  {
+    std::string piece_str = matches[0];
+    //std::cout << "found piece " << piece_str << endl;
+
+    Piece * piece = Piece::FromString(piece_str);
+
+    board.PlacePiece(piece);
+    begin = matches[0].second;
+  }
+
+  // TODO make function
+  begin = history_str.begin();
+  end = history_str.end();
+  if (!(regex_search(begin, end, matches, move_re)))
+  {
+    std::cout << "didn't find moves\n" << history_str << endl;
+    return;
+  }
+  while (regex_search(begin, end, matches, move_re))
+  {
+    std::string move_str = matches[0];
+    std::cout << "found move " << endl;
+
+    std::vector<Piece *> move;
+    boost::match_results<string::const_iterator> piece_matches;
+    string::const_iterator move_begin = move_str.begin();
+    string::const_iterator move_end = move_str.end();
+    while (regex_search(move_begin, move_end, piece_matches, piece_re))
+    {
+      std::string piece_str = piece_matches[0];
+      std::cout << "found moving piece: " << piece_str << endl;
+      move.push_back(Piece::FromString(piece_str));
+      move_begin = piece_matches[0].second;
+    }
+
+    board.history.push_back(move);
+    begin = matches[0].second;
+  }
+  if (board.history.size() > 0)
+  {
+    whose_turn = board.history[board.history.size()-1][0]->Color() == WHITE ? BLACK : WHITE;
+  }
 }
 
 PieceName Game::WhatPieceIsAt(int row, int col) const

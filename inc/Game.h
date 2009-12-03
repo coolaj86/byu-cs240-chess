@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <boost/regex.hpp>
 
 #include "ChessGuiDefines.h"
 #include "Board.h"
@@ -43,20 +45,20 @@ public:
   vector<Cell> ValidMoves(Cell);
 
   bool MoveFromTo(int row1, int col1, int row2, int col2);		//!< Moves a piece, if any, and returns true if possible and updates history, changes the turn on success
+  bool MoveFromTo(Cell, Cell);
   PieceColor WhoseTurn() const;																			//!< Return whose turn it is
   bool HasTurn(int row, int col) const;												//!< (PieceColor == TurnColor) ? true : false
   bool Check(PieceColor) const;
   EndGameType GameOver();
 
   void Undo();																								//!< Pops move from history and performs the reverse
-  void Save(string filename);																	//!< Writes history to xml
-  void Load(string filename);																	//!< Clears the game and loads history
+  void Save(ostream&);																				//!< Writes history to xml
+  void Load(istream&);																				//!< Clears the game and loads history
 
   void Test();																								//!< Runs Unit Tests
 
 private:
   Board board;
-  //vector<Move> history;
   PieceColor whose_turn;
 
   void _init();

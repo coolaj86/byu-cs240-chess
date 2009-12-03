@@ -5,8 +5,11 @@
 #include "ChessDebug.h"
 #include "Cell.h"
 
-//#include <set>
 #include <vector>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <boost/regex.hpp>
 
 enum PieceName {
   NO__PIECE=0,
@@ -47,15 +50,22 @@ enum PieceColor {
   };
 
 class Board;
+
 class Piece {
   friend class Board;
 public:
   Piece(PieceColor);
   ~Piece();
 
+  static Piece * Create(PieceType, PieceColor);
+  static Piece * Create(PieceType type, PieceColor color, int row, int col);
+  static Piece * FromString(std::string);
   PieceName Name() const;
   PieceType Type() const;
   PieceColor Color() const;
+  std::string TypeString() const;
+  std::string ColorString() const;
+  std::string ToString() const;
 
   void UpdateLocation(int row, int col);
   void UpdateLocation(Cell const&);

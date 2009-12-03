@@ -12,7 +12,7 @@ FLAGS = -Wall -g -Iinc -Ilib/inc
 #CFLAGS are the -I values needed to compile files using the GTKMM, SIGC, and LIBGLADE libraries
 CFLAGS = `pkg-config $(GTKMM) $(SIGC) $(LIBGLADE) --cflags`  -Iimages/ 
 #LIBS are the paths to the static libraries for GTKMM, SIGC, and LIBGLADE needed for linking
-LIBS = `pkg-config $(GTKMM) $(SIGC) $(LIBGLADE) --libs`
+LIBS = `pkg-config $(GTKMM) $(SIGC) $(LIBGLADE) --libs` -lboost_regex-mt
 
 #LIB_FLAGS D_LOG_DOMAIN is used by g_log in the ChessGui library to seperate logging messages from the library
 # from logging messages from the students code
@@ -38,6 +38,12 @@ LIB_OBJ_FILES = $(foreach file, $(LIBSOURCES), lib/obj/$(file).o)
 run: $(EXE_NAME)
 	./$(EXE_NAME)
 
+tgz: tar
+tar: clean
+	@tar -czf ../chess.aj.tgz inc/ lib/ Makefile bin/ obj/ src/ images
+
+submit: tar
+	./submit_chess.rb
 
 clean: 
 	-rm -f $(EXE_NAME)

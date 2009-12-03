@@ -39,12 +39,17 @@ void Board::Clear()
 // otherwise I violate "the class that creates also destroys"
 void Board::PlacePiece(int row, int col, Piece* piece)
 {
-  // TODO history (i.e. handle pawn promotion)
-  if (!ValidCell(row, col)) { throw new exception(); }
-  delete board[_map(row, col)];
-  board[_map(row, col)] = piece;
-  piece->board = this;
   piece->UpdateLocation(row, col);
+  PlacePiece(piece);
+}
+
+void Board::PlacePiece(Piece* piece)
+{
+  // TODO history (i.e. handle pawn promotion)
+  if (!ValidCell(piece->row, piece->col)) { throw new exception(); }
+  delete board[_map(piece->row, piece->col)];
+  board[_map(piece->row, piece->col)] = piece;
+  piece->board = this;
 }
 
 bool Board::MoveFromTo(Cell const& from, Cell const& to)

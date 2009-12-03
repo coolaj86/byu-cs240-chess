@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "ChessGuiDefines.h"
 #include "ChessGui.h"

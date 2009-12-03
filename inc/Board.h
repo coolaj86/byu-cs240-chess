@@ -56,6 +56,8 @@ using namespace std;
  */
 class Board {
 public:
+  vector< vector< Piece* > > history;												//!< An undoable history of moves
+
   Board();																									//!< Creates a clear board
   Board(Board&);																						//!< Copy contructor
   Board& operator=(Board&);																	//!< Copy assignment
@@ -68,7 +70,9 @@ public:
   King* FriendKing(PieceColor const) const;
   King* EnemyKing(PieceColor const) const;
   void RemovePieceAt(int row, int col);											//!< Remove and delete the piece
-  void PlacePiece(int row, int col, Piece *);								//!< Place a piece at row,col; removing existing piece if necessary
+  void PlacePiece(Piece *);																	//!< Place a piece at row,col; removing existing piece if necessary
+  void PlacePiece(Cell cell, Piece *);
+  void PlacePiece(int row, int col, Piece *);
   bool MoveFromTo(int row1, int col1, int row2, int col2);	//!< Safetly (memory) moves piece from one square to another and updates history
   bool MoveFromTo(Cell const& from, Cell const& to);
   bool ValidCell(int row, int col) const;										//!< The cell is in the bounds of the array
@@ -81,7 +85,6 @@ public:
 private:
   Piece** board;																						//!< Flat array, which is mapped
   // TODO handle pawn promotion without adding setup to history
-  vector< vector< Piece* > > history;														//!< An undoable history of moves
 
   void _init();																							//!< Setup a new board
   int	_map(int row, int col) const;													//!< Maps row,col to array, doesn't Bounds check

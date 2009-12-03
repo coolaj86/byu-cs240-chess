@@ -283,14 +283,18 @@ void Chess::on_SaveGame()
 {
   g_debug("Chess::on_SaveGame");
   if (filename.size() == 0) { filename = gui->SelectSaveFile(); }
-  game.Save(filename);
+  ofstream file;
+  file.open(filename.c_str());
+  if (!(file.good())) {return;}
+  game.Save(file);
+  file.close();
 }
 
 void Chess::on_SaveGameAs()
 {
   g_debug("Chess::on_SaveGameAs");
   filename = gui->SelectSaveFile();
-  game.Save(filename);
+  on_SaveGame();
   /*
   Called when someone selects 'Save As' from the 'Game' menu, or presses 'Shift-Ctrl-S'.
   */
@@ -298,7 +302,11 @@ void Chess::on_SaveGameAs()
 void Chess::on_LoadGame()
 {
   g_debug("Chess::on_LoadGame");
-  game.Load(gui->SelectLoadFile());
+  ifstream file;
+  file.open(gui->SelectLoadFile().c_str());
+  if (!(file.good())) {return;}
+  game.Load(file);
+  file.close();
   _update_board();
   /*
   Called when someone selects 'Open' from the toolbar, 'Game' menu, or presses 'Ctrl-O'.
