@@ -17,11 +17,11 @@ LIBS = `pkg-config $(GTKMM) $(SIGC) $(LIBGLADE) --libs` -lboost_regex-mt
 #LIB_FLAGS D_LOG_DOMAIN is used by g_log in the ChessGui library to seperate logging messages from the library
 # from logging messages from the students code
 #IMPORTANT: You must add a compiler option here for the library to be dynamic
-LIB_FLAGS = -DG_LOG_DOMAIN=\"ChessGui\" 
+LIB_FLAGS = -DG_LOG_DOMAIN=\"ChessGui\" -fPIC
 
 
 #change this to a dynamic library name
-LIBRARY= lib/libcs240.a
+LIBRARY= lib/libcs240.so
 EXE_NAME = bin/chess
 
 
@@ -34,16 +34,20 @@ LIB_OBJ_FILES = $(foreach file, $(LIBSOURCES), lib/obj/$(file).o)
 
 .PHONY: run clean bin lib memtest
 
-
 run: $(EXE_NAME)
 	./$(EXE_NAME)
 
+test:
+	@echo "Just play the game. That's test enough."
+
+all: clean bin
+
 tgz: tar
 tar: clean
-	@tar -czf ../chess.aj.tgz inc/ lib/ Makefile bin/ obj/ src/ images
+	@tar -czf ../chess.tgz inc/ lib/ Makefile bin/ obj/ src/ images/ cs240chess.glade
 
 submit: tar
-	./submit_chess.rb
+	../submit_cs.rb Chess chess.tgz
 
 clean: 
 	-rm -f $(EXE_NAME)
@@ -83,7 +87,8 @@ $(EXE_NAME): $(OBJ_FILES)  $(LIBRARY)
 #This is currently a STATIC library, you must change it to a DYNAMIC library
 #You must also add a compiler option to the variable LIB_FLAGS in order for the library to be dynamic
 $(LIBRARY): $(LIB_OBJ_FILES) 
-	ar r $(LIBRARY) $(LIB_OBJ_FILES)
+	$(CC) -shared $(FLAGS) $(CFLAGS) -o $(LIBRARY) $(LIB_OBJ_FILES)
+	#ar r $(LIBRARY) $(LIB_OBJ_FILES)
 
 
 
