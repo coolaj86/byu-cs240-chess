@@ -9,3 +9,4 @@ lib/*.a
 library.mk
 chess.mk
 .cdtproject
+*.so
